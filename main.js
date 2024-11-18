@@ -1797,9 +1797,7 @@ async function getBalanceChanges(txHash, priceMap) {
       fromAccountEntry.assets,
       token.tokenAddress
     );
-    fromAssetEntry.amount = (
-      BigInt(fromAssetEntry.amount) - BigInt(token.amount)
-    ).toString(); // Subtract amount
+    fromAssetEntry.amount = fromAssetEntry.amount - token.amount;
     fromAssetEntry.value -= token.usdAmount || 0;
 
     // Handle 'to' account entry
@@ -1808,9 +1806,7 @@ async function getBalanceChanges(txHash, priceMap) {
       toAccountEntry.assets,
       token.tokenAddress
     );
-    toAssetEntry.amount = (
-      BigInt(toAssetEntry.amount) + BigInt(token.amount)
-    ).toString(); // Add amount
+    toAssetEntry.amount = toAssetEntry.amount + token.amount;
     toAssetEntry.value += token.usdAmount || 0;
   });
 
