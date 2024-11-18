@@ -1464,12 +1464,17 @@ async function containsArbitrage(txHash) {
   const receipt = await provider.getTransactionReceipt(txHash);
   const isSuccessful = receipt.status === 1 && Number(receipt.gasUsed) > 120000;
 
+  // Initialize counters and path array
+  let swapEventCount = 0;
+  let dexPath = [];
+  let tokenPath = [];
+
   if (!isSuccessful)
     return {
       hasSwapEvent: false,
-      swapEventCount: 0,
-      dexPath: [],
-      tokenPath: [],
+      swapEventCount,
+      dexPath,
+      tokenPath,
     };
 
   const logs = receipt.logs;
@@ -1497,15 +1502,10 @@ async function containsArbitrage(txHash) {
     "LogTrade(address,address,address,uint256,uint256)"
   );
 
-  // Initialize counters and path array
-  let swapEventCount = 0;
-  let dexPath = [];
-  let tokenPath = [];
-
   // Iterate through logs to identify the Swap events and their type
   for (const log of logs) {
     const pairAddress = log.address;
-    let token0, token1, amountIn0, pairContract, factoryAddress;
+    let amountIn0, pairContract, factoryAddress;
 
     switch (log.topics[0]) {
       case swapEventSignatureV2:
@@ -1516,7 +1516,7 @@ async function containsArbitrage(txHash) {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
         } catch (error) {
-          dexPath.push("interface issue");
+          dexPath.push("V2 interface issue");
         }
         [token0Address, token1Address] = await Promise.all([
           pairContract.token0(),
@@ -1540,8 +1540,8 @@ async function containsArbitrage(txHash) {
         } else {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
         }
-
         break;
+
       case swapEventSignatureV3:
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
@@ -1550,7 +1550,7 @@ async function containsArbitrage(txHash) {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
         } catch (error) {
-          dexPath.push("interface issue");
+          dexPath.push("V3 interface issue");
         }
         [token0Address, token1Address] = await Promise.all([
           pairContract.token0(),
@@ -1573,8 +1573,8 @@ async function containsArbitrage(txHash) {
         } else {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
         }
-
         break;
+
       case curveSwapSignature:
         swapEventCount++;
         dexPath.push("Curve");
