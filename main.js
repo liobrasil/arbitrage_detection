@@ -1779,27 +1779,42 @@ async function getBalanceChanges(txHash, priceMap) {
     return entry;
   }
 
+  // Helper function to find or create an asset entry
+  function findOrCreateAsset(assets, tokenAddress) {
+    let asset = assets.find((item) => item.address === tokenAddress);
+    if (!asset) {
+      asset = { address: tokenAddress, amount: "0", value: 0 };
+      assets.push(asset);
+    }
+    return asset;
+  }
+
   // Iterate through each transfer
   tokens.forEach((token) => {
-    // Add the 'from' account entry
+    // Handle 'from' account entry
     const fromAccountEntry = findOrCreateAccount(token.from);
-    fromAccountEntry.assets.push({
-      address: token.tokenAddress,
-      amount: token.amount.toString(),
-      sign: false,
-      value: token.usdAmount ? token.usdAmount.toString() : "",
-    });
+    const fromAssetEntry = findOrCreateAsset(
+      fromAccountEntry.assets,
+      token.tokenAddress
+    );
+    fromAssetEntry.amount = (
+      BigInt(fromAssetEntry.amount) - BigInt(token.amount)
+    ).toString(); // Subtract amount
+    fromAssetEntry.value -= token.usdAmount || 0;
 
-    // Add the 'to' account entry
+    // Handle 'to' account entry
     const toAccountEntry = findOrCreateAccount(token.to);
-    toAccountEntry.assets.push({
-      address: token.tokenAddress,
-      amount: token.amount.toString(),
-      sign: true,
-      value: token.usdAmount ? token.usdAmount.toString() : "",
-    });
+    const toAssetEntry = findOrCreateAsset(
+      toAccountEntry.assets,
+      token.tokenAddress
+    );
+    toAssetEntry.amount = (
+      BigInt(toAssetEntry.amount) + BigInt(token.amount)
+    ).toString(); // Add amount
+    toAssetEntry.value += token.usdAmount || 0;
   });
 
+  console.log(JSON.stringify(result));
   return result;
 }
 
@@ -1836,7 +1851,6 @@ async function processBlockTransactions(blockNumber) {
     // Get the transaction details to access the 'to' address
     const txDetails = await provider.getTransaction(txHash);
     const toAddress = txDetails.to;
-    const fromAdress = txDetails.from;
 
     // Step 4: Filter transactions that contain the "Swap" event
     const { hasSwapEvent, swapEventCount, dexPath, tokenPath } =
@@ -1854,28 +1868,13 @@ async function processBlockTransactions(blockNumber) {
       ? computeValueDifference(toAddressBalanceChange)
       : 0;
 
-    const fromAddressBalanceChange = balanceChanges.find(
-      (change) => change.account.toLowerCase() === fromAdress.toLowerCase()
-    );
-    const fromBalanceDifference = fromAddressBalanceChange
-      ? computeValueDifference(fromAddressBalanceChange)
-      : 0;
-
-    // Step 7: Filter the result for positive amounts in the first element
-    const condition = toAddressBalanceChange || fromAddressBalanceChange;
-
-    if (condition) {
+    if (toAddressBalanceChange) {
       totalArbitrageCount++;
-      let botAddress = toAddressBalanceChange ? toAddress : "";
-
       console.log("--- Transaction Details", blockNumber);
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
-      console.log("Bot address:", botAddress);
-      console.log(
-        "Profit in USD:",
-        toAddressBalanceChange ? toBalanceDifference : fromBalanceDifference
-      );
+      console.log("Bot address:", toAddress);
+      console.log("Profit in USD:", toBalanceDifference);
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
