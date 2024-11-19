@@ -1842,7 +1842,7 @@ async function getInternalTransactions(txHash) {
     trace.structLogs.forEach((log) => {
       if (log.op === "CALL" && log.stack.length > 1) {
         const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
-        const value = ethers.from(log.stack[log.stack.length - 3]); // Extract value
+        const value = BigInt(log.stack[log.stack.length - 3]); // Extract value
 
         if (!value.isZero() && to === PUISSANT_PAYMNET) {
           console.log(
