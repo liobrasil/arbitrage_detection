@@ -2070,7 +2070,7 @@ async function processBlockTransactions(blockNumber) {
     }
 
     if (toAddressBalanceChange || fromAddressBalanceChange) {
-      let [containRouter, builder] = await getInternalTransactions(txHash);
+      let { containRouter, builder } = await getInternalTransactions(txHash);
       if (containRouter) break;
 
       if (builder) totalBuilderPayments++;
