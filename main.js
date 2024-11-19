@@ -2073,7 +2073,10 @@ async function processBlockTransactions(blockNumber) {
       let { containRouter, builder } = await getInternalTransactions(txHash);
       if (containRouter) break;
 
-      if (builder) totalBuilderPayments++;
+      if (builder) {
+        console.log("BBBBBBBBUILDER", builder);
+        totalBuilderPayments++;
+      }
 
       totalArbitrageCount++;
       console.log("--- Transaction Details", blockNumber);
