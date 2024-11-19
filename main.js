@@ -1909,5 +1909,6 @@ provider.on("block", async (blockNumber) => {
   console.log(`||| New Block Detected: ${blockNumber}`);
   console.time("Processing Time");
   await processBlockTransactions(blockNumber);
-  console.timeEnd("Processing Time", "\n\n");
+  console.timeEnd("Processing Time");
+  console.log("\n\n");
 });
