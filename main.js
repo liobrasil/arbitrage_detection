@@ -1563,23 +1563,24 @@ async function containsArbitrage(txHash) {
 
         token0Contract = new ethers.Contract(token0Address, erc20Abi, provider);
         token1Contract = new ethers.Contract(token1Address, erc20Abi, provider);
-        [token0Symbol, token1Symbol] = await Promise.all([
-          token0Contract.symbol(),
-          token1Contract.symbol(),
-        ]);
+        [token0Symbol, token1Symbol, token0Decimals, token1Decimals] =
+          await Promise.all([
+            token0Contract.symbol(),
+            token1Contract.symbol(),
+            token0Contract.decimals(),
+            token1Contract.decimals(),
+          ]);
 
         amounts = ethers.AbiCoder.defaultAbiCoder().decode(
           ["uint256", "uint256", "uint256", "uint256"],
           log.data
         );
-        amount0In = amounts[0];
-        amount1In = amounts[1];
-        amount0Out = amounts[2];
-        amount1Out = amounts[3];
+        amount0In = ethers.parseUnits(amounts[0], token0Decimals);
+        amount1In = ethers.parseUnits(amounts[1], token1Decimals);
+        amount0Out = ethers.parseUnits(amounts[2], token0Decimals);
+        amount1Out = ethers.parseUnits(amounts[3], token1Decimals);
+
         if (amount0In != 0 && amount1Out != 0) {
-          console.log("amount0In: ", amount0In);
-          console.log("amount1Out: ", amount1Out);
-          console.log("t0 -> t1");
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
           amountsArray.push(amount0In + "-" + amount1Out);
         } else {
@@ -1604,18 +1605,21 @@ async function containsArbitrage(txHash) {
         ]);
         token0Contract = new ethers.Contract(token0Address, erc20Abi, provider);
         token1Contract = new ethers.Contract(token1Address, erc20Abi, provider);
-        [token0Symbol, token1Symbol] = await Promise.all([
-          token0Contract.symbol(),
-          token1Contract.symbol(),
-        ]);
+        [token0Symbol, token1Symbol, token0Decimals, token1Decimals] =
+          await Promise.all([
+            token0Contract.symbol(),
+            token1Contract.symbol(),
+            token0Contract.decimals(),
+            token1Contract.decimals(),
+          ]);
 
         amounts = ethers.AbiCoder.defaultAbiCoder().decode(
           ["int256", "int256", "uint160", "uint128", "int24"],
           log.data
         );
 
-        amount0In = amounts[0];
-        amount1Out = amounts[1];
+        amount0In = ethers.parseUnits(amounts[0], token0Decimals);
+        amount1Out = ethers.parseUnits(amounts[1], token1Decimals);
         if (Number(amountIn0) < 0) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
           amountsArray.push(amount1Out + "-" + amount0In);
