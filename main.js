@@ -2068,7 +2068,7 @@ async function processBlockTransactions(blockNumber) {
       console.log("Token path:", tokenPath);
       console.log("Amounts: ", amounts);
       console.log("Is valid path: ", isValidPath, "\n\n");
-      consoe.log("Bundle ID : ", uuidv4());
+      console.log("Bundle ID : ", uuidv4());
     }
   }
 
