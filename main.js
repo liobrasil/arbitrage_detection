@@ -1569,9 +1569,9 @@ async function containsArbitrage(txHash) {
         )[0];
 
         if (Number(amountIn0) < 0) {
-          tokenPath.push(token0Symbol + "=>" + token1Symbol);
-        } else {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
+        } else {
+          tokenPath.push(token0Symbol + "=>" + token1Symbol);
         }
         break;
 
