@@ -1889,7 +1889,7 @@ async function processBlockTransactions(blockNumber) {
         "Profit in USD:",
         toBalanceDifference,
         " || ",
-        fromAddressBalanceChange
+        toBalanceDifference
       );
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
