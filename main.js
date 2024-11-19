@@ -7,7 +7,7 @@ const KUCOIN_API_URL = "https://api.kucoin.com/api/v1/market/allTickers";
 const HUOBI_API_URL = "https://api.huobi.pro/market/tickers";
 const OKX_API_URL = "https://www.okx.com/api/v5/market/tickers?instType=SPOT";
 const PUISSANT_PAYMNET = "0x4848489f0b2bedd788c696e2d79b6b69d7484848";
-const PANCAKESWAP_ROUTER_V2 = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
+const PANCAKESWAP_ROUTER_V2 = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 
 //ERC20 ABI
 const erc20Abi = [
@@ -1952,7 +1952,8 @@ async function processBlockTransactions(blockNumber) {
     const toAddress = txDetails.to;
     const fromAddress = txDetails.from;
 
-    if (toAddress === PANCAKESWAP_ROUTER_V2) continue;
+    if (toAddress.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
+      continue;
 
     // Step 4: Filter transactions that contain the "Swap" event
     const { hasSwapEvent, swapEventCount, dexPath, tokenPath, isValidPath } =
