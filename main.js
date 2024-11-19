@@ -1,5 +1,6 @@
-const { ethers } = require("ethers");
+const { ethers, uuidV4 } = require("ethers");
 const axios = require("axios");
+const { v4: uuidv4 } = require("uuid");
 
 // Configuration
 const IPC_PATH = "/data/bsc/geth.fast/geth.ipc";
@@ -1493,6 +1494,7 @@ async function containsArbitrage(txHash) {
   let dexPath = [];
   let tokenPath = [];
   let isValidPath = false;
+  let amountsArray = [];
 
   if (!isSuccessful)
     return {
@@ -1501,6 +1503,7 @@ async function containsArbitrage(txHash) {
       dexPath,
       tokenPath,
       isValidPath,
+      amountsArray,
     };
 
   const logs = receipt.logs;
@@ -1534,7 +1537,13 @@ async function containsArbitrage(txHash) {
   // Iterate through logs to identify the Swap events and their type
   for (const log of logs) {
     const pairAddress = log.address;
-    let amountIn0, pairContract, factoryAddress;
+    let amounts,
+      pairContract,
+      factoryAddress,
+      amount0In,
+      amount1Out,
+      amount0Out,
+      amount1In;
 
     switch (log.topics[0]) {
       case swapEventSignatureV2:
@@ -1563,12 +1572,16 @@ async function containsArbitrage(txHash) {
           ["uint256", "uint256", "uint256", "uint256"],
           log.data
         );
-        let amount0In = amounts[0];
-        let amount1Out = amounts[3];
+        amount0In = amounts[0];
+        amount1In = amounts[1];
+        amount0Out = amounts[2];
+        amount1Out = amounts[3];
         if (amount0In != 0 && amount1Out != 0) {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
+          amountsArray.push(amount0In + "-" + amount1Out);
         } else {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
+          amountsArray.push(amount1In + "-" + amount0Out);
         }
         break;
 
@@ -1593,15 +1606,19 @@ async function containsArbitrage(txHash) {
           token1Contract.symbol(),
         ]);
 
-        amountIn0 = ethers.AbiCoder.defaultAbiCoder().decode(
+        amounts = ethers.AbiCoder.defaultAbiCoder().decode(
           ["int256", "int256", "uint160", "uint128", "int24"],
           log.data
-        )[0];
+        );
 
+        amount0In = amounts[0];
+        amount1Out = amounts[1];
         if (Number(amountIn0) < 0) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
+          amountsArray.push(amount1Out + "-" + amount0In);
         } else {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
+          amountsArray.push(amount0In + "-" + amount1Out);
         }
         break;
 
@@ -1679,6 +1696,7 @@ async function containsArbitrage(txHash) {
       dexPath,
       tokenPath,
       isValidPath: isPathValid(tokenPath),
+      amountsArray,
     };
   }
 
@@ -1688,7 +1706,8 @@ async function containsArbitrage(txHash) {
     swapEventCount,
     dexPath,
     tokenPath,
-    isPathValid,
+    isValidPath,
+    amountsArray,
   };
 }
 
@@ -1934,33 +1953,29 @@ async function getInternalTransactions(txHash) {
         if (Number(value) !== 0) {
           switch (to.toLowerCase()) {
             case BUILDER_PUISSANT_ADDRESS.toLowerCase():
-              console.log(
-                `PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
-              );
+              console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
               break;
 
             case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
               console.log(
-                `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+                `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
               break;
 
             case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
               console.log(
-                `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+                `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
               break;
 
             case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
               console.log(
-                `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+                `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
               break;
 
             case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
-              console.log(
-                `BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
-              );
+              console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
               break;
 
             default:
@@ -1998,8 +2013,14 @@ async function processBlockTransactions(blockNumber) {
       continue;
 
     // Step 4: Filter transactions that contain the "Swap" event
-    const { hasSwapEvent, swapEventCount, dexPath, tokenPath, isValidPath } =
-      await containsArbitrage(txHash);
+    const {
+      hasSwapEvent,
+      swapEventCount,
+      dexPath,
+      tokenPath,
+      amounts,
+      isValidPath,
+    } = await containsArbitrage(txHash);
 
     if (!hasSwapEvent) continue;
 
@@ -2045,7 +2066,9 @@ async function processBlockTransactions(blockNumber) {
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
+      console.log("Amounts: ", amounts);
       console.log("Is valid path: ", isValidPath, "\n\n");
+      consoe.log("Bundle ID : ", uuidv4());
     }
   }
 
