@@ -1543,7 +1543,9 @@ async function containsArbitrage(txHash) {
       amount0In,
       amount1Out,
       amount0Out,
-      amount1In;
+      amount1In,
+      amount0,
+      amount1;
 
     switch (log.topics[0]) {
       case swapEventSignatureV2:
@@ -1618,14 +1620,14 @@ async function containsArbitrage(txHash) {
           log.data
         );
 
-        amount0In = ethers.formatUnits(amounts[0], token0Decimals);
-        amount1Out = ethers.formatUnits(amounts[1], token1Decimals);
+        amount0 = ethers.formatUnits(amounts[0], token0Decimals);
+        amount1 = ethers.formatUnits(amounts[1], token1Decimals);
         if (Number(amountIn0) < 0) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1Out + "=>" + amount0In);
+          amountsArray.push(amount1 + "=>" + amount0);
         } else {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0In + "=>" + amount1Out);
+          amountsArray.push(amount0 + "=>" + amount1);
         }
         break;
 
