@@ -1575,10 +1575,10 @@ async function containsArbitrage(txHash) {
           ["uint256", "uint256", "uint256", "uint256"],
           log.data
         );
-        amount0In = ethers.parseUnits(amounts[0], token0Decimals);
-        amount1In = ethers.parseUnits(amounts[1], token1Decimals);
-        amount0Out = ethers.parseUnits(amounts[2], token0Decimals);
-        amount1Out = ethers.parseUnits(amounts[3], token1Decimals);
+        amount0In = ethers.formatUnits(amounts[0], token0Decimals);
+        amount1In = ethers.formatUnits(amounts[1], token1Decimals);
+        amount0Out = ethers.formatUnits(amounts[2], token0Decimals);
+        amount1Out = ethers.formatUnits(amounts[3], token1Decimals);
 
         if (amount0In != 0 && amount1Out != 0) {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
@@ -1618,8 +1618,8 @@ async function containsArbitrage(txHash) {
           log.data
         );
 
-        amount0In = ethers.parseUnits(amounts[0], token0Decimals);
-        amount1Out = ethers.parseUnits(amounts[1], token1Decimals);
+        amount0In = ethers.formatUnits(amounts[0], token0Decimals);
+        amount1Out = ethers.formatUnits(amounts[1], token1Decimals);
         if (Number(amountIn0) < 0) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
           amountsArray.push(amount1Out + "-" + amount0In);
