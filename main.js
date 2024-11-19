@@ -1565,7 +1565,7 @@ async function containsArbitrage(txHash) {
         }
         break;
 
-      case swapEventSignatureV3 || swapEventSignatureMancakeV3:
+      case swapEventSignatureV3:
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
 
@@ -1588,6 +1588,46 @@ async function containsArbitrage(txHash) {
 
         amountIn0 = ethers.AbiCoder.defaultAbiCoder().decode(
           ["int256", "int256", "uint160", "uint128", "int24"],
+          log.data
+        )[0];
+
+        if (Number(amountIn0) < 0) {
+          tokenPath.push(token1Symbol + "=>" + token0Symbol);
+        } else {
+          tokenPath.push(token0Symbol + "=>" + token1Symbol);
+        }
+        break;
+      case swapEventSignatureMancakeV3:
+        swapEventCount++;
+        pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
+
+        try {
+          factoryAddress = await pairContract.factory();
+          dexPath.push(getDexNameByAddress(factoryAddress));
+        } catch (error) {
+          dexPath.push("V3 Mancake interface issue");
+        }
+        [token0Address, token1Address] = await Promise.all([
+          pairContract.token0(),
+          pairContract.token1(),
+        ]);
+        token0Contract = new ethers.Contract(token0Address, erc20Abi, provider);
+        token1Contract = new ethers.Contract(token1Address, erc20Abi, provider);
+        [token0Symbol, token1Symbol] = await Promise.all([
+          token0Contract.symbol(),
+          token1Contract.symbol(),
+        ]);
+
+        amountIn0 = ethers.AbiCoder.defaultAbiCoder().decode(
+          [
+            "int256",
+            "int256",
+            "uint160",
+            "uint128",
+            "int24",
+            "uint128",
+            "uint128",
+          ],
           log.data
         )[0];
 
