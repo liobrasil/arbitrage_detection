@@ -1952,7 +1952,7 @@ async function processBlockTransactions(blockNumber) {
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
-      console.log("Is valid path: ", isValidPath);
+      console.log("Is valid path: ", isValidPath, "\n\n");
     }
   }
 
