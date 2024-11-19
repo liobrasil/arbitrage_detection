@@ -1597,7 +1597,9 @@ async function containsArbitrage(txHash) {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
         }
         break;
+
       case swapEventSignatureMancakeV3:
+        console.log("Mancake");
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
 
