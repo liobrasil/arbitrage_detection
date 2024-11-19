@@ -1902,7 +1902,7 @@ async function processBlockTransactions(blockNumber) {
     "* * * * * * * TOTAL NUMBER OF ARBITRAGE FOUND:",
     totalArbitrageCount
   );
-  console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum);
+  console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum, "\n\n");
 }
 
 provider.on("block", async (blockNumber) => {
