@@ -1813,21 +1813,21 @@ async function getBalanceChanges(txHash, priceMap) {
   return result;
 }
 
-// Function to compute the difference between values for sign true and sign false
+// Function to compute the difference between positive and negative values
 function computeValueDifference(toOrFromBalanceChanges) {
   let valuePositive = 0;
   let valueNegative = 0;
 
   for (const asset of toOrFromBalanceChanges.assets) {
-    const value = Number(asset.value);
-    if (asset.sign) {
-      valuePositive += value; // Sum up values with sign true
+    const value = Number(asset.value); // Get the value of the asset
+    if (Number(asset.amount) >= 0) {
+      valuePositive += value; // Treat positive amounts as positive values
     } else {
-      valueNegative += value; // Sum up values with sign false
+      valueNegative += value; // Treat negative amounts as negative values
     }
   }
 
-  // Calculate the difference: value for sign true - value for sign false
+  // Calculate the difference: sum of positive values - sum of negative values
   const difference = valuePositive - valueNegative;
   return difference;
 }
