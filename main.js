@@ -1599,7 +1599,6 @@ async function containsArbitrage(txHash) {
         break;
 
       case swapEventSignatureMancakeV3:
-        console.log("Mancake");
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
 
@@ -1974,10 +1973,7 @@ async function processBlockTransactions(blockNumber) {
     const toAddressBalanceChange = balanceChanges.find(
       (change) => change.account.toLowerCase() === toAddress.toLowerCase()
     );
-    console.log(
-      "toAddressBalanceChange : ",
-      JSON.stringify(toAddressBalanceChange)
-    );
+
     const toBalanceDifference = toAddressBalanceChange
       ? computeValueDifference(toAddressBalanceChange)
       : 0;
