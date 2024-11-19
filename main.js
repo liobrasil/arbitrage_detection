@@ -1882,8 +1882,6 @@ async function processBlockTransactions(blockNumber) {
 
     if (!hasSwapEvent) continue;
 
-    await getInternalTransactions(txHash);
-
     const balanceChanges = await getBalanceChanges(txHash, priceMap);
 
     // Step 6: Check if the 'to' or 'from' address has balance changes
@@ -1908,6 +1906,8 @@ async function processBlockTransactions(blockNumber) {
     }
 
     if (toAddressBalanceChange || fromAddressBalanceChange) {
+      await getInternalTransactions(txHash);
+
       totalArbitrageCount++;
       console.log("--- Transaction Details", blockNumber);
       console.log("Position of the transaction in the block:", i);
