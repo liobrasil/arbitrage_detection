@@ -1902,12 +1902,12 @@ async function processBlockTransactions(blockNumber) {
     "* * * * * * * TOTAL NUMBER OF ARBITRAGE FOUND:",
     totalArbitrageCount
   );
-  console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum, "\n\n");
+  console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum);
 }
 
 provider.on("block", async (blockNumber) => {
   console.log(`||| New Block Detected: ${blockNumber}`);
   console.time("Processing Time");
   await processBlockTransactions(blockNumber);
-  console.timeEnd("Processing Time");
+  console.timeEnd("Processing Time", "\n\n");
 });
