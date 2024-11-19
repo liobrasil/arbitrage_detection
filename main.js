@@ -1847,7 +1847,9 @@ async function getInternalTransactions(txHash) {
         ); // Extract value
 
         if (Number(value) != 0 && to === PUISSANT_PAYMNET) {
-          console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
+          console.log(
+            `PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+          );
         }
       }
     });
