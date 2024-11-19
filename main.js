@@ -1839,11 +1839,10 @@ async function getInternalTransactions(txHash) {
     // Call debug_traceTransaction
     const trace = await provider.send("debug_traceTransaction", [txHash]);
 
-    console.log("Internal Transactions Trace:", trace);
     trace.structLogs.forEach((log) => {
       if (log.op === "CALL" && log.stack.length > 1) {
         const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
-        const value = ethers.BigNumber.from(log.stack[log.stack.length - 3]); // Extract value
+        const value = ethers.from(log.stack[log.stack.length - 3]); // Extract value
 
         if (!value.isZero() && to === PUISSANT_PAYMNET) {
           console.log(
