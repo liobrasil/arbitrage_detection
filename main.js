@@ -1460,6 +1460,41 @@ async function fetchTransactions(blockNumber) {
   return block.transactions;
 }
 
+function isPathValid(path) {
+  // Create an adjacency map for connections
+  const connections = new Map();
+
+  // Populate the connections map
+  path.forEach((segment) => {
+    const [from, to] = segment.split("=>");
+    if (!connections.has(from)) {
+      connections.set(from, []);
+    }
+    connections.get(from).push(to);
+  });
+
+  // Check if the path is circular
+  const visited = new Set();
+  let current = path[0].split("=>")[0]; // Start from the 'from' of the first segment
+  let start = current; // Save the starting point for closure check
+
+  while (!visited.has(current)) {
+    visited.add(current);
+
+    // If the current node has no outgoing connections, it's invalid
+    if (!connections.has(current) || connections.get(current).length === 0) {
+      return false;
+    }
+
+    // Move to the next node
+    const next = connections.get(current).pop();
+    current = next;
+  }
+
+  // Ensure all connections are visited and the loop is closed
+  return visited.size === path.length && current === start;
+}
+
 // Function to check if the transaction contains at least two "Swap" events (V2, V3, Curve, Balancer, 1inch, Kyber, dYdX)
 async function containsArbitrage(txHash) {
   const receipt = await provider.getTransactionReceipt(txHash);
@@ -1469,6 +1504,7 @@ async function containsArbitrage(txHash) {
   let swapEventCount = 0;
   let dexPath = [];
   let tokenPath = [];
+  let isValidPath = false;
 
   if (!isSuccessful)
     return {
@@ -1476,6 +1512,7 @@ async function containsArbitrage(txHash) {
       swapEventCount,
       dexPath,
       tokenPath,
+      isValidPath,
     };
 
   const logs = receipt.logs;
@@ -1531,12 +1568,13 @@ async function containsArbitrage(txHash) {
           token1Contract.symbol(),
         ]);
 
-        amountIn0 = ethers.AbiCoder.defaultAbiCoder().decode(
+        amounts = ethers.AbiCoder.defaultAbiCoder().decode(
           ["uint256", "uint256", "uint256", "uint256"],
           log.data
-        )[0];
-
-        if (amountIn0 != 0) {
+        );
+        let amount0In = amounts[0];
+        let amountIOut = amounts[3];
+        if (amount0In != 0 && amountIOut != 0) {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
         } else {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
@@ -1603,11 +1641,23 @@ async function containsArbitrage(txHash) {
 
   // If at least two Swap events are found, return true for arbitrage
   if (swapEventCount >= 2) {
-    return { hasSwapEvent: true, swapEventCount, dexPath, tokenPath };
+    return {
+      hasSwapEvent: true,
+      swapEventCount,
+      dexPath,
+      tokenPath,
+      isValidPath: isPathValid(tokenPath),
+    };
   }
 
   // If fewer than two Swap events are found, return false
-  return { hasSwapEvent: false, swapEventCount: 0, dexPath: [], tokenPath: [] };
+  return {
+    hasSwapEvent: false,
+    swapEventCount,
+    dexPath,
+    tokenPath,
+    isPathValid,
+  };
 }
 
 // Fetch token prices from Kucoin API
@@ -1877,7 +1927,7 @@ async function processBlockTransactions(blockNumber) {
     const fromAddress = txDetails.from;
 
     // Step 4: Filter transactions that contain the "Swap" event
-    const { hasSwapEvent, swapEventCount, dexPath, tokenPath } =
+    const { hasSwapEvent, swapEventCount, dexPath, tokenPath, isValidPath } =
       await containsArbitrage(txHash);
 
     if (!hasSwapEvent) continue;
@@ -1922,6 +1972,7 @@ async function processBlockTransactions(blockNumber) {
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
+      console.log("Is valid path: ", isValidPath);
     }
   }
 
