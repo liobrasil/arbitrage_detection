@@ -6,7 +6,7 @@ const IPC_PATH = "/data/bsc/geth.fast/geth.ipc";
 const KUCOIN_API_URL = "https://api.kucoin.com/api/v1/market/allTickers";
 const HUOBI_API_URL = "https://api.huobi.pro/market/tickers";
 const OKX_API_URL = "https://www.okx.com/api/v5/market/tickers?instType=SPOT";
-const PUISSANT_PAYMNET = "0x4848489f0b2bedd788c696e2d79b6b69d7484848";
+const PUISSANT_PAYMENT = "0x4848489f0b2bedd788c696e2d79b6b69d7484848";
 const PANCAKESWAP_ROUTER_V2 = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 
 //ERC20 ABI
@@ -1922,13 +1922,20 @@ async function getInternalTransactions(txHash) {
           BigInt(log.stack[log.stack.length - 3])
         ); // Extract value
 
-        if (Number(value) != 0 && to === PUISSANT_PAYMNET) {
+        if (to.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
+          return true;
+        if (
+          Number(value) != 0 &&
+          to.toLowerCase() === PUISSANT_PAYMENT.toLowerCase()
+        ) {
           console.log(
             `PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
           );
         }
       }
     });
+
+    return false;
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
   }
@@ -1985,7 +1992,8 @@ async function processBlockTransactions(blockNumber) {
     }
 
     if (toAddressBalanceChange || fromAddressBalanceChange) {
-      await getInternalTransactions(txHash);
+      let containRouter = await getInternalTransactions(txHash);
+      if (containRouter) break;
 
       totalArbitrageCount++;
       console.log("--- Transaction Details", blockNumber);
