@@ -1964,9 +1964,7 @@ async function getInternalTransactions(txHash) {
               break;
 
             default:
-              console.log(
-                `UNKNOWN PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
-              );
+              break;
           }
         }
       }
