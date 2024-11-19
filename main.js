@@ -1848,6 +1848,7 @@ async function processBlockTransactions(blockNumber) {
     // Get the transaction details to access the 'to' address
     const txDetails = await provider.getTransaction(txHash);
     const toAddress = txDetails.to;
+    const fromAddress = txDetails.from;
 
     // Step 4: Filter transactions that contain the "Swap" event
     const { hasSwapEvent, swapEventCount, dexPath, tokenPath } =
@@ -1865,15 +1866,31 @@ async function processBlockTransactions(blockNumber) {
       ? computeValueDifference(toAddressBalanceChange)
       : 0;
 
-    if (toBalanceDifference > 0) sum += toBalanceDifference;
+    const fromAddressBalanceChange = balanceChanges.find(
+      (change) => change.account.toLowerCase() === fromAddress.toLowerCase()
+    );
+    const fromBalanceDifference = fromAddressBalanceChange
+      ? computeValueDifference(fromAddressBalanceChange)
+      : 0;
 
-    if (toAddressBalanceChange) {
+    if (toBalanceDifference > 0) {
+      sum += toBalanceDifference;
+    } else if (fromBalanceDifference > 0) {
+      sum += fromBalanceDifference;
+    }
+
+    if (toAddressBalanceChange || fromAddressBalanceChange) {
       totalArbitrageCount++;
       console.log("--- Transaction Details", blockNumber);
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
       console.log("Bot address:", toAddress);
-      console.log("Profit in USD:", toBalanceDifference);
+      console.log(
+        "Profit in USD:",
+        toBalanceDifference,
+        " || ",
+        fromAddressBalanceChange
+      );
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
