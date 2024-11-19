@@ -6,6 +6,7 @@ const IPC_PATH = "/data/bsc/geth.fast/geth.ipc";
 const KUCOIN_API_URL = "https://api.kucoin.com/api/v1/market/allTickers";
 const HUOBI_API_URL = "https://api.huobi.pro/market/tickers";
 const OKX_API_URL = "https://www.okx.com/api/v5/market/tickers?instType=SPOT";
+const PUISSANT_PAYMNET = "0x4848489f0b2bedd788c696e2d79b6b69d7484848";
 
 //ERC20 ABI
 const erc20Abi = [
@@ -1832,6 +1833,33 @@ function computeValueDifference(toOrFromBalanceChanges) {
   return difference;
 }
 
+// Function to trace internal transactions
+async function getInternalTransactions(txHash) {
+  try {
+    // Call debug_traceTransaction
+    const trace = await provider.send("debug_traceTransaction", [txHash]);
+
+    console.log("Internal Transactions Trace:", trace);
+    trace.structLogs.forEach((log) => {
+      if (log.op === "CALL" && log.stack.length > 1) {
+        const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
+        const value = ethers.BigNumber.from(log.stack[log.stack.length - 3]); // Extract value
+
+        if (!value.isZero() && to === PUISSANT_PAYMNET) {
+          console.log(
+            `Internal Transfer: To: ${to}, Amount: ${ethers.formatUnits(
+              value,
+              "ether"
+            )} BNB`
+          );
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching internal transactions:", error.message);
+  }
+}
+
 // Main function to execute the filtering process
 async function processBlockTransactions(blockNumber) {
   let totalArbitrageCount = 0;
@@ -1844,6 +1872,8 @@ async function processBlockTransactions(blockNumber) {
 
   for (let i = 0; i < transactions.length; i++) {
     const txHash = transactions[i];
+
+    await getInternalTransactions(txHash);
 
     // Get the transaction details to access the 'to' address
     const txDetails = await provider.getTransaction(txHash);
