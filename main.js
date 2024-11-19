@@ -2025,7 +2025,7 @@ async function processBlockTransactions(blockNumber) {
       swapEventCount,
       dexPath,
       tokenPath,
-      amounts,
+      amountsArray,
       isValidPath,
     } = await containsArbitrage(txHash);
 
@@ -2073,7 +2073,7 @@ async function processBlockTransactions(blockNumber) {
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
-      console.log("Amounts: ", amounts);
+      console.log("Amounts: ", amountsArray);
       console.log("Is valid path: ", isValidPath);
       console.log("Bundle ID : ", uuidv4(), "\n\n");
     }
