@@ -1577,6 +1577,9 @@ async function containsArbitrage(txHash) {
         amount0Out = amounts[2];
         amount1Out = amounts[3];
         if (amount0In != 0 && amount1Out != 0) {
+          console.log("amount0In: ", amount0In);
+          console.log("amount1Out: ", amount1Out);
+          console.log("t0 -> t1");
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
           amountsArray.push(amount0In + "-" + amount1Out);
         } else {
@@ -2067,8 +2070,8 @@ async function processBlockTransactions(blockNumber) {
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
       console.log("Amounts: ", amounts);
-      console.log("Is valid path: ", isValidPath, "\n\n");
-      console.log("Bundle ID : ", uuidv4());
+      console.log("Is valid path: ", isValidPath);
+      console.log("Bundle ID : ", uuidv4(), "\n\n");
     }
   }
 
