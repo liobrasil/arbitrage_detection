@@ -1847,12 +1847,7 @@ async function getInternalTransactions(txHash) {
         ); // Extract value
 
         if (Number(value) != 0 && to === PUISSANT_PAYMNET) {
-          console.log(
-            `BOOM - Internal Transfer: To: ${to}, Amount: ${ethers.formatUnits(
-              value,
-              "ether"
-            )} BNB`
-          );
+          console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
         }
       }
     });
