@@ -1841,7 +1841,6 @@ async function getInternalTransactions(txHash) {
 
     trace.structLogs.forEach((log) => {
       if (log.op === "CALL" && log.stack.length > 1) {
-        console.log("BINGO...");
         const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
         const value = ethers.formatEther(
           BigInt(log.stack[log.stack.length - 3])
@@ -1849,7 +1848,7 @@ async function getInternalTransactions(txHash) {
 
         if (Number(value) === 0 && to === PUISSANT_PAYMNET) {
           console.log(
-            `Internal Transfer: To: ${to}, Amount: ${ethers.formatUnits(
+            `BOOM - Internal Transfer: To: ${to}, Amount: ${ethers.formatUnits(
               value,
               "ether"
             )} BNB`
