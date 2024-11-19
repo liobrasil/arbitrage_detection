@@ -1974,6 +1974,10 @@ async function processBlockTransactions(blockNumber) {
     const toAddressBalanceChange = balanceChanges.find(
       (change) => change.account.toLowerCase() === toAddress.toLowerCase()
     );
+    console.log(
+      "toAddressBalanceChange : ",
+      JSON.stringify(toAddressBalanceChange)
+    );
     const toBalanceDifference = toAddressBalanceChange
       ? computeValueDifference(toAddressBalanceChange)
       : 0;
