@@ -1810,7 +1810,6 @@ async function getBalanceChanges(txHash, priceMap) {
     toAssetEntry.value += token.usdAmount || 0;
   });
 
-  console.log(JSON.stringify(result));
   return result;
 }
 
