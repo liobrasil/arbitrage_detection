@@ -1874,8 +1874,6 @@ async function processBlockTransactions(blockNumber) {
   for (let i = 0; i < transactions.length; i++) {
     const txHash = transactions[i];
 
-    await getInternalTransactions(txHash);
-
     // Get the transaction details to access the 'to' address
     const txDetails = await provider.getTransaction(txHash);
     const toAddress = txDetails.to;
@@ -1886,6 +1884,8 @@ async function processBlockTransactions(blockNumber) {
       await containsArbitrage(txHash);
 
     if (!hasSwapEvent) continue;
+
+    await getInternalTransactions(txHash);
 
     const balanceChanges = await getBalanceChanges(txHash, priceMap);
 
