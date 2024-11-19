@@ -2082,8 +2082,7 @@ async function processBlockTransactions(blockNumber) {
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
       console.log("Amounts: ", amountsArray);
-      console.log("Is valid path: ", isValidPath);
-      console.log("Bundle ID : ", uuidv4(), "\n\n");
+      console.log("Is valid path: ", isValidPath, "\n\n");
     }
   }
 
