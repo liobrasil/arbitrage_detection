@@ -1504,6 +1504,9 @@ async function containsArbitrage(txHash) {
   const swapEventSignatureV3 = ethers.id(
     "Swap(address,address,int256,int256,uint160,uint128,int24)"
   );
+  const swapEventSignatureMancakeV3 = ethers.id(
+    "Swap(address,address,int256,int256,uint160,uint128,int24,uint128,uint128)"
+  );
   const curveSwapSignature = ethers.id(
     "TokenExchange(address,int128,uint256,int128,uint256)"
   );
@@ -1553,15 +1556,15 @@ async function containsArbitrage(txHash) {
           log.data
         );
         let amount0In = amounts[0];
-        let amountIOut = amounts[3];
-        if (amount0In != 0 && amountIOut != 0) {
+        let amount1Out = amounts[3];
+        if (amount0In != 0 && amount1Out != 0) {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
         } else {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
         }
         break;
 
-      case swapEventSignatureV3:
+      case swapEventSignatureV3 || swapEventSignatureMancakeV3:
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
 
