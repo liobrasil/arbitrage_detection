@@ -1844,7 +1844,7 @@ async function getInternalTransactions(txHash) {
         const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
         const value = BigInt(log.stack[log.stack.length - 3]); // Extract value
 
-        if (!value.isZero() && to === PUISSANT_PAYMNET) {
+        if (value != 0n && to === PUISSANT_PAYMNET) {
           console.log(
             `Internal Transfer: To: ${to}, Amount: ${ethers.formatUnits(
               value,
