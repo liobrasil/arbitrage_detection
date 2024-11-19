@@ -1461,38 +1461,18 @@ async function fetchTransactions(blockNumber) {
 }
 
 function isPathValid(path) {
-  // Create an adjacency map for connections
-  const connections = new Map();
+  // Iterate through the path to check if adjacent elements are connected
+  for (let i = 0; i < path.length - 1; i++) {
+    const [from, to] = path[i].split("=>"); // Split the current segment
+    const [nextFrom] = path[i + 1].split("=>"); // Get the 'from' of the next segment
 
-  // Populate the connections map
-  path.forEach((segment) => {
-    const [from, to] = segment.split("=>");
-    if (!connections.has(from)) {
-      connections.set(from, []);
+    if (to !== nextFrom) {
+      return false; // The path is broken between adjacent segments
     }
-    connections.get(from).push(to);
-  });
-
-  // Check if the path is circular
-  const visited = new Set();
-  let current = path[0].split("=>")[0]; // Start from the 'from' of the first segment
-  let start = current; // Save the starting point for closure check
-
-  while (!visited.has(current)) {
-    visited.add(current);
-
-    // If the current node has no outgoing connections, it's invalid
-    if (!connections.has(current) || connections.get(current).length === 0) {
-      return false;
-    }
-
-    // Move to the next node
-    const next = connections.get(current).pop();
-    current = next;
   }
 
-  // Ensure all connections are visited and the loop is closed
-  return visited.size === path.length && current === start;
+  // If no invalid connections were found, the path is valid
+  return true;
 }
 
 // Function to check if the transaction contains at least two "Swap" events (V2, V3, Curve, Balancer, 1inch, Kyber, dYdX)
