@@ -1840,6 +1840,8 @@ async function processBlockTransactions(blockNumber) {
     fetchAllPrices(),
   ]);
 
+  let sum = 0;
+
   for (let i = 0; i < transactions.length; i++) {
     const txHash = transactions[i];
 
@@ -1863,6 +1865,8 @@ async function processBlockTransactions(blockNumber) {
       ? computeValueDifference(toAddressBalanceChange)
       : 0;
 
+    if (toBalanceDifference > 0) sum += toBalanceDifference;
+
     if (toAddressBalanceChange) {
       totalArbitrageCount++;
       console.log("--- Transaction Details", blockNumber);
@@ -1878,9 +1882,10 @@ async function processBlockTransactions(blockNumber) {
 
   console.log("Finished block processing", blockNumber);
   console.log(
-    "*|*|*|*|*|*|* TOTAL NUMBER OF ARBITRAGE FOUND:",
+    "* * * * * * * TOTAL NUMBER OF ARBITRAGE FOUND:",
     totalArbitrageCount
   );
+  console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum);
 }
 
 provider.on("block", async (blockNumber) => {
