@@ -6,7 +6,14 @@ const IPC_PATH = "/data/bsc/geth.fast/geth.ipc";
 const KUCOIN_API_URL = "https://api.kucoin.com/api/v1/market/allTickers";
 const HUOBI_API_URL = "https://api.huobi.pro/market/tickers";
 const OKX_API_URL = "https://www.okx.com/api/v5/market/tickers?instType=SPOT";
-const PUISSANT_PAYMENT = "0x4848489f0b2bedd788c696e2d79b6b69d7484848";
+
+const BUILDER_PUISSANT_ADDRESS = "0x4848489f0b2BEdd788c696e2D79b6b69D7484848";
+const BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER =
+  "0x6AF484EABbCF3cbdf603Df87D3Ace75De13C28f3";
+const BUILDER_BLOCKSMITH_ADDRESS = "0x0000000000007592b04bB3BB8985402cC37Ca224";
+const BUILDER_BLOCKRAZOR_ADDRESS = "0x1266C6bE60392A8Ff346E8d5ECCd3E69dD9c5F20";
+const BUILDER_BLOXROUTE_ADDRESS = "0x74c5F8C6ffe41AD4789602BDB9a48E6Cad623520";
+
 const PANCAKESWAP_ROUTER_V2 = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 
 //ERC20 ABI
@@ -1923,13 +1930,44 @@ async function getInternalTransactions(txHash) {
 
         if (to.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
           return true;
-        if (
-          Number(value) != 0 &&
-          to.toLowerCase() === PUISSANT_PAYMENT.toLowerCase()
-        ) {
-          console.log(
-            `PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
-          );
+        // Switch-based logic
+        if (Number(value) !== 0) {
+          switch (to.toLowerCase()) {
+            case BUILDER_PUISSANT_ADDRESS.toLowerCase():
+              console.log(
+                `PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+              );
+              break;
+
+            case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
+              console.log(
+                `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+              );
+              break;
+
+            case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
+              console.log(
+                `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+              );
+              break;
+
+            case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
+              console.log(
+                `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+              );
+              break;
+
+            case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
+              console.log(
+                `BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+              );
+              break;
+
+            default:
+              console.log(
+                `UNKNOWN PAYMENT: To: ${to}, Amount: ${value} BNB at txHash: ${txHash}`
+              );
+          }
         }
       }
     });
