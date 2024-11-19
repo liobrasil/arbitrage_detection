@@ -1582,10 +1582,10 @@ async function containsArbitrage(txHash) {
 
         if (amount0In != 0 && amount1Out != 0) {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0In + "-" + amount1Out);
+          amountsArray.push(amount0In + "=>" + amount1Out);
         } else {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1In + "-" + amount0Out);
+          amountsArray.push(amount1In + "=>" + amount0Out);
         }
         break;
 
@@ -1622,10 +1622,10 @@ async function containsArbitrage(txHash) {
         amount1Out = ethers.formatUnits(amounts[1], token1Decimals);
         if (Number(amountIn0) < 0) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1Out + "-" + amount0In);
+          amountsArray.push(amount1Out + "=>" + amount0In);
         } else {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0In + "-" + amount1Out);
+          amountsArray.push(amount0In + "=>" + amount1Out);
         }
         break;
 
