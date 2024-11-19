@@ -1647,10 +1647,13 @@ async function containsArbitrage(txHash) {
         ]);
         token0Contract = new ethers.Contract(token0Address, erc20Abi, provider);
         token1Contract = new ethers.Contract(token1Address, erc20Abi, provider);
-        [token0Symbol, token1Symbol] = await Promise.all([
-          token0Contract.symbol(),
-          token1Contract.symbol(),
-        ]);
+        [token0Symbol, token1Symbol, token0Decimals, token1Decimals] =
+          await Promise.all([
+            token0Contract.symbol(),
+            token1Contract.symbol(),
+            token0Contract.decimals(),
+            token1Contract.decimals(),
+          ]);
 
         amounts = ethers.AbiCoder.defaultAbiCoder().decode(
           [
