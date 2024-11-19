@@ -1586,8 +1586,8 @@ async function containsArbitrage(txHash) {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
           amountsArray.push(amount0In + "=>" + amount1Out);
         } else {
-          tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1In + "=>" + amount0Out);
+          tokenPath.push(token1Symbol + " => " + token0Symbol);
+          amountsArray.push(amount1In + " => " + amount0Out);
         }
         break;
 
@@ -1626,8 +1626,8 @@ async function containsArbitrage(txHash) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
           amountsArray.push(amount1 + "=>" + Math.abs(amount0));
         } else {
-          tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
+          tokenPath.push(token0Symbol + " => " + token1Symbol);
+          amountsArray.push(amount0 + " => " + Math.abs(amount1));
         }
         break;
 
@@ -1669,10 +1669,10 @@ async function containsArbitrage(txHash) {
         amount1 = ethers.formatUnits(amounts[1], token1Decimals);
         if (Number(amount0) < 0) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1 + "=>" + Math.abs(amount0));
+          amountsArray.push(amount1 + " => " + Math.abs(amount0));
         } else {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
+          amountsArray.push(amount0 + " => " + Math.abs(amount1));
         }
 
       case curveSwapSignature:
