@@ -1963,39 +1963,39 @@ async function getInternalTransactions(txHash) {
         ); // Extract value
 
         if (to.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
-          return { containRouter: true, builder: "" };
+          return { containRouter: true, builder: false };
         // Switch-based logic
         if (Number(value) !== 0) {
           switch (to.toLowerCase()) {
             case BUILDER_PUISSANT_ADDRESS.toLowerCase():
               console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
-              return { containRouter: false, builder: to };
+              return { containRouter: false, builder: true };
               break;
 
             case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
               console.log(
                 `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
-              return { containRouter: false, builder: to };
+              return { containRouter: false, builder: true };
               break;
 
             case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
               console.log(
                 `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
-              return { containRouter: false, builder: to };
+              return { containRouter: false, builder: true };
               break;
 
             case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
               console.log(
                 `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
-              return { containRouter: false, builder: to };
+              return { containRouter: false, builder: true };
               break;
 
             case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
               console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
-              return { containRouter: false, builder: to };
+              return { containRouter: false, builder: true };
               break;
 
             default:
@@ -2005,7 +2005,7 @@ async function getInternalTransactions(txHash) {
       }
     });
 
-    return { containRouter: false, builder: "" };
+    return { containRouter: false, builder: false };
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
   }
