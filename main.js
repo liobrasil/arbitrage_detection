@@ -1622,12 +1622,12 @@ async function containsArbitrage(txHash) {
 
         amount0 = ethers.formatUnits(amounts[0], token0Decimals);
         amount1 = ethers.formatUnits(amounts[1], token1Decimals);
-        if (Number(amountIn0) < 0) {
+        if (Number(amount0) < 0) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1 + "=>" + amount0);
+          amountsArray.push(amount1 + "=>" + Math.abs(amount0));
         } else {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0 + "=>" + amount1);
+          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
         }
         break;
 
@@ -1652,7 +1652,7 @@ async function containsArbitrage(txHash) {
           token1Contract.symbol(),
         ]);
 
-        amountIn0 = ethers.AbiCoder.defaultAbiCoder().decode(
+        amounts = ethers.AbiCoder.defaultAbiCoder().decode(
           [
             "int256",
             "int256",
@@ -1663,14 +1663,17 @@ async function containsArbitrage(txHash) {
             "uint128",
           ],
           log.data
-        )[0];
+        );
 
-        if (Number(amountIn0) < 0) {
+        amount0 = ethers.formatUnits(amounts[0], token0Decimals);
+        amount1 = ethers.formatUnits(amounts[1], token1Decimals);
+        if (Number(amount0) < 0) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
+          amountsArray.push(amount1 + "=>" + Math.abs(amount0));
         } else {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
+          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
         }
-        break;
 
       case curveSwapSignature:
         swapEventCount++;
