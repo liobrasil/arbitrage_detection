@@ -1846,7 +1846,7 @@ async function getInternalTransactions(txHash) {
           BigInt(log.stack[log.stack.length - 3])
         ); // Extract value
 
-        if (Number(value) === 0 && to === PUISSANT_PAYMNET) {
+        if (Number(value) != 0 && to === PUISSANT_PAYMNET) {
           console.log(
             `BOOM - Internal Transfer: To: ${to}, Amount: ${ethers.formatUnits(
               value,
