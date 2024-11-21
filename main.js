@@ -1599,6 +1599,9 @@ async function containsArbitrage(txHash) {
   const dydxTradeSignature = ethers.id(
     "LogTrade(address,address,address,uint256,uint256)"
   );
+  const swapEventSignatureSmardex = ethers.id(
+    "Swap(address,address,uint256,int256,int256)"
+  );
 
   // Iterate through logs to identify the Swap events and their type
   for (const log of logs) {
@@ -1817,6 +1820,10 @@ async function containsArbitrage(txHash) {
       case dydxTradeSignature:
         swapEventCount++;
         dexPath.push("dYdX");
+        break;
+      case swapEventSignatureSmardex:
+        swapEventCount++;
+        dexPath.push("Smardex");
         break;
       default:
         break;
