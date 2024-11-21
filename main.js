@@ -2193,10 +2193,9 @@ async function processBlockTransactions(blockNumber) {
         amount_in: amountsArray?.[0],
         amount_in_usd: amountsArray?.[0] * priceMap?.[tokenPath?.[0]] || 0,
         amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-        amount_out_usd:
-          amountsArray?.[amountsArray.length - 1] *
-            priceMap?.[tokenPath?.[tokenPath.length - 1]] || 0,
-        profit_usd: toBalanceDifference,
+
+        profit_usd:
+          dexPath.length == tokenPath.length ? toBalanceDifference : "issue",
       };
 
       writeToLogFile(logData);
