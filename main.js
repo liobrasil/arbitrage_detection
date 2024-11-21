@@ -2570,12 +2570,12 @@ async function containsArbitrage(txHash) {
         console.log("tokenOut", log.topics[2]);
         try {
           tokenInContract = new ethers.Contract(
-            log.topics[1],
+            `0x${log.topics[2].slice(26)}`,
             erc20Abi,
             provider
           );
           tokenOutContract = new ethers.Contract(
-            log.topics[2],
+            `0x${log.topics[3].slice(26)}`,
             erc20Abi,
             provider
           );
@@ -3061,7 +3061,7 @@ async function processBlockTransactions(blockNumber) {
 
       writeToLogFile(logData);
 
-      if (dexPath.length != tokenPath.length || !isValidPath) {
+      if (dexPath.length != tokenPath.length) {
         console.log("--- Transaction Details", blockNumber);
         console.log("Position of the transaction in the block:", i);
         console.log("Transaction hash:", txHash);
