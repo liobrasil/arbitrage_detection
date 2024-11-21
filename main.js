@@ -1,6 +1,7 @@
 const { ethers, uuidV4 } = require("ethers");
 const axios = require("axios");
-const { v4: uuidv4 } = require("uuid");
+const fs = require("fs");
+const path = require("path");
 
 // Configuration
 const IPC_PATH = "/data/bsc/geth.fast/geth.ipc";
@@ -1460,6 +1461,28 @@ const V3Abi = [
   },
 ];
 
+// Helper function to get the current timestamp in ISO 8601 format
+function getTimestamp() {
+  return new Date().toISOString();
+}
+
+// Helper function to write data to the log file
+function writeToLogFile(data, blockNumber) {
+  const logDirectory = "/home/adfl/logs/monitoring";
+  const date = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+  const logFileName = `adfl.log.${date}`;
+  const logFilePath = path.join(logDirectory, logFileName);
+
+  // Ensure the directory exists
+  if (!fs.existsSync(logDirectory)) {
+    fs.mkdirSync(logDirectory, { recursive: true });
+  }
+
+  // Write data to the log file
+  const logEntry = JSON.stringify(data) + "\n";
+  fs.appendFileSync(logFilePath, logEntry, "utf8");
+}
+
 // Initialize Ethereum provider
 const provider = new ethers.IpcSocketProvider(IPC_PATH);
 
@@ -2006,7 +2029,7 @@ async function getInternalTransactions(txHash) {
   }
 }
 
-// Main function to execute the filtering process
+// Updated main function
 async function processBlockTransactions(blockNumber) {
   let totalArbitrageCount = 0;
   let [transactions, priceMap] = await Promise.all([
@@ -2019,7 +2042,6 @@ async function processBlockTransactions(blockNumber) {
   for (let i = 0; i < transactions.length; i++) {
     const txHash = transactions[i];
 
-    // Get the transaction details to access the 'to' address
     const txDetails = await provider.getTransaction(txHash);
     const toAddress = txDetails.to;
     const fromAddress = txDetails.from;
@@ -2027,7 +2049,6 @@ async function processBlockTransactions(blockNumber) {
     if (toAddress.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
       continue;
 
-    // Step 4: Filter transactions that contain the "Swap" event
     const {
       hasSwapEvent,
       swapEventCount,
@@ -2041,7 +2062,6 @@ async function processBlockTransactions(blockNumber) {
 
     const balanceChanges = await getBalanceChanges(txHash, priceMap);
 
-    // Step 6: Check if the 'to' or 'from' address has balance changes
     const toAddressBalanceChange = balanceChanges.find(
       (change) => change.account.toLowerCase() === toAddress.toLowerCase()
     );
@@ -2068,6 +2088,30 @@ async function processBlockTransactions(blockNumber) {
       if (containRouter) break;
 
       totalArbitrageCount++;
+
+      const logData = {
+        timestamp: getTimestamp(),
+        level: "INFO",
+        _type: "MevAnalyse",
+        _appid: "adfl_bsc_mev_analyse",
+        from: fromAddress,
+        to: toAddress,
+        block_hash: txDetails.blockHash,
+        block_number: blockNumber,
+        token_path: tokenPath || [],
+        venue_path: dexPath || [],
+        nb_swap: swapEventCount,
+        amount_in: amountsArray?.[0] || 0,
+        amount_in_usd: amountsArray?.[0] * priceMap?.[tokenPath?.[0]] || 0,
+        amount_out: amountsArray?.[amountsArray.length - 1] || 0,
+        amount_out_usd:
+          amountsArray?.[amountsArray.length - 1] *
+            priceMap?.[tokenPath?.[tokenPath.length - 1]] || 0,
+        profit_usd: toBalanceDifference || fromBalanceDifference || 0,
+      };
+
+      writeToLogFile(logData, blockNumber);
+
       console.log("--- Transaction Details", blockNumber);
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
