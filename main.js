@@ -2046,7 +2046,7 @@ async function processBlockTransactions(blockNumber) {
     const toAddress = txDetails.to;
     const fromAddress = txDetails.from;
 
-    if (toAddress.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
+    if (toAddress?.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
       continue;
 
     const {
