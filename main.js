@@ -5,8 +5,24 @@ const path = require("path");
 
 // Read JSON file synchronously
 const filePath = "./dexFactories.json";
-const rawData = fs.readFileSync(filePath); // Adjust the path to your JSON file
-const dexFactories = JSON.parse(rawData);
+// Function to read and parse the JSON file
+const readJsonFile = () => {
+  try {
+    const rawData = fs.readFileSync(filePath, "utf8"); // Synchronously read the file
+    const dexFactories = JSON.parse(rawData); // Parse the JSON
+    console.log("Updated JSON data:", dexFactories); // Log or use the refreshed data
+    return dexFactories;
+  } catch (error) {
+    console.error("Error reading or parsing the JSON file:", error);
+    return null; // Return null or handle the error as needed
+  }
+};
+
+// Refresh the JSON file every 60 seconds
+let dexFactories = readJsonFile(); // Initial load
+setInterval(() => {
+  dexFactories = readJsonFile(); // Refresh the JSON
+}, 60000); // 60000ms = 60 seconds
 
 // Function to add a factory
 const addFactory = (key, value) => {
@@ -19,6 +35,14 @@ const addFactory = (key, value) => {
 
     // Parse the JSON data
     let jsonData = JSON.parse(data);
+
+    // Check if the value (address) already exists
+    const addressExists = Object.values(jsonData).includes(value);
+
+    if (addressExists) {
+      console.log(`Address ${value} already exists. Skipping.`);
+      return;
+    }
 
     // Add the new factory
     jsonData[key] = value;
