@@ -2177,7 +2177,7 @@ async function processBlockTransactions(blockNumber) {
         venue_path: dexPath,
         new_dex: newDex,
         is_new_dex_verified:
-          newDex.length > 0 ? checkContractsVerified(newDex) : null,
+          newDex.length > 0 ? await checkContractsVerified(newDex) : null,
         nb_swap: swapEventCount,
         amount_in: amountsArray?.[0],
         amount_in_usd: amountsArray?.[0] * priceMap?.[tokenPath?.[0]] || 0,
