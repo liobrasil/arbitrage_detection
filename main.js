@@ -288,6 +288,15 @@ const erc20Abi = [
 
 // Factories addresseS
 const dexFactories = {
+  OwlswapV3_two: "0x30D9e1f894FBc7d2227Dd2a017F955d5586b1e14",
+  OwlswapV3_one: "0x126555dd55a39328F69400d6aE4F782Bd4C34ABb",
+  DinosaurEggs: "0x73D9F93D53505cB8C4c7f952ae42450d9E859D10",
+  WaultFinance: "0xB42E3FE71b7E0673335b3331B3e1053BD9822570",
+  OrionPoolV2: "0xE52cCf7B6cE4817449F2E6fA7efD7B567803E4b4",
+  UNXWAPV3: "0x82fA7b2Ce2A76C7888A9D3B0a81E0b2ecfd8d40c",
+  Thena: "0x306f06c147f064a010530292a1eb6737c3e378e4",
+  PancakeSwapV1: "0xBCfCcbde45cE874adCB698cC183deBcF17952812",
+  //old DEXes
   PancakeSwapV2: "0xca143ce32fe78f1f7019d7d551a6402fc5350c73",
   PancakeSwapV3: "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
   BiswapV2: "0x858E3312ed3A876947EA49d572A7C42DE08af7EE",
@@ -2086,6 +2095,7 @@ async function processBlockTransactions(blockNumber) {
 
     const txDetails = await provider.getTransaction(txHash);
     const toAddress = txDetails?.to; // error pop out
+
     const fromAddress = txDetails.from;
 
     if (toAddress?.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
@@ -2106,7 +2116,7 @@ async function processBlockTransactions(blockNumber) {
     const balanceChanges = await getBalanceChanges(txHash, priceMap);
 
     const toAddressBalanceChange = balanceChanges.find(
-      (change) => change.account.toLowerCase() === toAddress.toLowerCase()
+      (change) => change.account.toLowerCase() === toAddress?.toLowerCase()
     );
 
     const toBalanceDifference = toAddressBalanceChange
