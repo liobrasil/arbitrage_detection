@@ -4,8 +4,35 @@ const fs = require("fs");
 const path = require("path");
 
 // Read JSON file synchronously
-const rawData = fs.readFileSync("./dexFactories.json"); // Adjust the path to your JSON file
+const filePath = "./dexFactories.json";
+const rawData = fs.readFileSync(filePath); // Adjust the path to your JSON file
 const dexFactories = JSON.parse(rawData);
+
+// Function to add a factory
+const addFactory = (key, value) => {
+  // Read the existing JSON data
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading file:", err);
+      return;
+    }
+
+    // Parse the JSON data
+    let jsonData = JSON.parse(data);
+
+    // Add the new factory
+    jsonData[key] = value;
+
+    // Write the updated JSON back to the file
+    fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), (err) => {
+      if (err) {
+        console.error("Error writing file:", err);
+        return;
+      }
+      console.log("Factory added successfully!");
+    });
+  });
+};
 
 // Configuration
 const IPC_PATH = "/data/bsc/geth.fast/geth.ipc";
@@ -2327,6 +2354,10 @@ async function containsArbitrage(txHash) {
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown")
             newDexes.push(factoryAddress);
+          addFactory(
+            `NewFactory${Object.keys(dexFactories).length}`,
+            factoryAddress
+          );
         } catch (error) {
           dexPath.push("V2 interface issue");
         }
@@ -2387,6 +2418,10 @@ async function containsArbitrage(txHash) {
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown")
             newDexes.push(factoryAddress);
+          addFactory(
+            `NewFactory${Object.keys(dexFactories).length}`,
+            factoryAddress
+          );
         } catch (error) {
           dexPath.push("V3 interface issue");
         }
@@ -2445,6 +2480,10 @@ async function containsArbitrage(txHash) {
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown")
             newDexes.push(factoryAddress);
+          addFactory(
+            `NewFactory${Object.keys(dexFactories).length}`,
+            factoryAddress
+          );
         } catch (error) {
           dexPath.push("V3 Mancake interface issue");
         }
@@ -2569,6 +2608,10 @@ async function containsArbitrage(txHash) {
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown")
             newDexes.push(factoryAddress);
+          addFactory(
+            `NewFactory${Object.keys(dexFactories).length}`,
+            factoryAddress
+          );
         } catch (error) {
           dexPath.push("smardex interface issue");
         }
