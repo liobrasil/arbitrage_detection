@@ -2045,12 +2045,13 @@ async function getBalanceChanges(txHash, priceMap) {
 }
 
 // Function to compute the difference between positive and negative values
-function computeValueDifference(balanceChanges) {
+function computeUsdDifference(balanceChanges) {
   let valuePositive = 0;
   let valueNegative = 0;
 
   for (const asset of balanceChanges.assets) {
     const value = Number(asset.value); // Get the value of the asset
+    if (value === 0) return "one token without quote";
     if (Number(asset.amount) >= 0) {
       valuePositive += value; // Treat positive amounts as positive values
     } else {
@@ -2163,14 +2164,14 @@ async function processBlockTransactions(blockNumber) {
     );
 
     const toBalanceDifference = toAddressBalanceChange
-      ? computeValueDifference(toAddressBalanceChange)
+      ? computeUsdDifference(toAddressBalanceChange)
       : 0;
 
     if (toBalanceDifference > 0) {
       sum += toBalanceDifference;
     }
 
-    if (toAddressBalanceChange) {
+    if (toAddressBalanceChange || toBalanceDifference === 0) {
       totalArbitrageCount++;
 
       const logData = {
@@ -2195,7 +2196,9 @@ async function processBlockTransactions(blockNumber) {
           amountsArray?.[amountsArray.length - 1] *
             priceMap?.[tokenPath?.[tokenPath.length - 1]] || 0,
         profit_usd:
-          dexPath.length == tokenPath.length ? toBalanceDifference : "issue",
+          dexPath.length == tokenPath.length
+            ? toBalanceDifference
+            : "issue with number of amounts",
       };
 
       writeToLogFile(logData);
