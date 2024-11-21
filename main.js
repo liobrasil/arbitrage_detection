@@ -2192,7 +2192,7 @@ async function processBlockTransactions(blockNumber) {
         from: fromAddress,
         to: toAddress,
         txn_hash: txHash,
-        is_path_valid: isValidPath,
+        is_path_valid: dexPath.length == tokenPath.length && isValidPath,
         block_number: blockNumber,
         token_path: tokenPath,
         venue_path: dexPath,
