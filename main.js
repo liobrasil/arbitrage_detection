@@ -1518,6 +1518,7 @@ async function containsArbitrage(txHash) {
   let tokenPath = [];
   let isValidPath = false;
   let amountsArray = [];
+  let newDex = [];
 
   if (!isSuccessful)
     return {
@@ -1527,6 +1528,7 @@ async function containsArbitrage(txHash) {
       tokenPath,
       isValidPath,
       amountsArray,
+      newDex,
     };
 
   const logs = receipt.logs;
@@ -1578,6 +1580,8 @@ async function containsArbitrage(txHash) {
         try {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
+          if (getDexNameByAddress(factoryAddress) == "Unknown")
+            newDex.push(factoryAddress);
         } catch (error) {
           dexPath.push("V2 interface issue");
         }
@@ -1621,6 +1625,8 @@ async function containsArbitrage(txHash) {
         try {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
+          if (getDexNameByAddress(factoryAddress) == "Unknown")
+            newDex.push(factoryAddress);
         } catch (error) {
           dexPath.push("V3 interface issue");
         }
@@ -1677,6 +1683,8 @@ async function containsArbitrage(txHash) {
         try {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
+          if (getDexNameByAddress(factoryAddress) == "Unknown")
+            newDex.push(factoryAddress);
         } catch (error) {
           dexPath.push("V3 Mancake interface issue");
         }
@@ -1767,6 +1775,7 @@ async function containsArbitrage(txHash) {
       tokenPath,
       isValidPath: isPathValid(tokenPath),
       amountsArray,
+      newDex,
     };
   }
 
@@ -1778,6 +1787,7 @@ async function containsArbitrage(txHash) {
     tokenPath,
     isValidPath,
     amountsArray,
+    newDex,
   };
 }
 
@@ -2085,6 +2095,7 @@ async function processBlockTransactions(blockNumber) {
       hasSwapEvent,
       swapEventCount,
       dexPath,
+      newDex,
       tokenPath,
       amountsArray,
       isValidPath,
@@ -2129,6 +2140,7 @@ async function processBlockTransactions(blockNumber) {
         block_number: blockNumber,
         token_path: tokenPath,
         venue_path: dexPath,
+        new_dex: newDex,
         nb_swap: swapEventCount,
         amount_in: amountsArray?.[0],
         amount_in_usd: amountsArray?.[0] * priceMap?.[tokenPath?.[0]] || 0,
