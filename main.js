@@ -2043,7 +2043,7 @@ async function processBlockTransactions(blockNumber) {
     const txHash = transactions[i];
 
     const txDetails = await provider.getTransaction(txHash);
-    const toAddress = txDetails.to;
+    const toAddress = txDetails?.to; // error pop out
     const fromAddress = txDetails.from;
 
     if (toAddress?.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
