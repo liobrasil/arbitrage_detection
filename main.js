@@ -1600,7 +1600,7 @@ async function containsArbitrage(txHash) {
     "LogTrade(address,address,address,uint256,uint256)"
   );
   const swapEventSignatureSmardex = ethers.id(
-    "Swap(address,address,uint256,int256,int256)"
+    "Swap(address,address,int256,int256)"
   );
 
   // Iterate through logs to identify the Swap events and their type
