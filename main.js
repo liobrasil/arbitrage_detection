@@ -341,6 +341,31 @@ const dexFactories = {
   PlanetBlue: "0xa053582601214feb3778031a002135cbbb7dba18",
 };
 
+async function checkContractsVerified(contractAddresses) {
+  const results = [];
+
+  for (const address of contractAddresses) {
+    const url = `https://api.bscscan.com/api?module=contract&action=getabi&address=${address}&apikey=71XH1XIDNUERIVZ7P8YUUE41K7EZT7245S`;
+    try {
+      const response = await axios.get(url);
+      const data = response.data;
+
+      results.push({
+        address: address,
+        verified: data.status === "1", // true if verified, false otherwise
+      });
+    } catch (error) {
+      console.error(`Error checking address ${address}:`, error.message);
+      results.push({
+        address: address,
+        verified: null, // null indicates an error occurred
+      });
+    }
+  }
+
+  return results;
+}
+
 // Function to find the DEX name by address
 function getDexNameByAddress(address) {
   for (const [dexName, dexAddress] of Object.entries(dexFactories)) {
@@ -2151,6 +2176,8 @@ async function processBlockTransactions(blockNumber) {
         token_path: tokenPath,
         venue_path: dexPath,
         new_dex: newDex,
+        is_new_dex_verified:
+          newDex.length > 0 ? checkContractsVerified(newDex) : null,
         nb_swap: swapEventCount,
         amount_in: amountsArray?.[0],
         amount_in_usd: amountsArray?.[0] * priceMap?.[tokenPath?.[0]] || 0,
