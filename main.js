@@ -2433,6 +2433,7 @@ async function containsArbitrage(txHash) {
           tokenPath.push(token1Symbol + "=>" + token0Symbol);
           amountsArray.push(amount1In + "=>" + amount0Out);
         }
+
         break;
 
       case swapEventSignatureV3:
@@ -3059,34 +3060,32 @@ async function processBlockTransactions(blockNumber) {
 
       writeToLogFile(logData);
 
-      if (dexPath.length != tokenPath.length) {
-        console.log("--- Transaction Details", blockNumber);
-        console.log("Position of the transaction in the block:", i);
-        console.log("Transaction hash:", txHash);
-        console.log("Bot address:", toAddress);
-        console.log(
-          "Profit in USD:",
-          dexPath.length == tokenPath.length ? toBalanceDifference : "issue"
-        );
-        console.log("Number of swaps:", swapEventCount);
-        console.log("Dex path:", dexPath);
-        console.log("Token path:", tokenPath);
-        console.log("Amounts: ", amountsArray);
-        console.log(
-          "Is valid path: ",
-          dexPath.length == tokenPath.length && isValidPath,
-          "\n\n"
-        );
-      }
+      console.log("--- Transaction Details", blockNumber);
+      console.log("Position of the transaction in the block:", i);
+      console.log("Transaction hash:", txHash);
+      console.log("Bot address:", toAddress);
+      console.log(
+        "Profit in USD:",
+        dexPath.length == tokenPath.length ? toBalanceDifference : "issue"
+      );
+      console.log("Number of swaps:", swapEventCount);
+      console.log("Dex path:", dexPath);
+      console.log("Token path:", tokenPath);
+      console.log("Amounts: ", amountsArray);
+      console.log(
+        "Is valid path: ",
+        dexPath.length == tokenPath.length && isValidPath,
+        "\n\n"
+      );
     }
   }
 
-  // console.log("Finished block processing", blockNumber);
-  // console.log(
-  //   "* * * * * * * TOTAL NUMBER OF ARBITRAGE FOUND:",
-  //   totalArbitrageCount
-  // );
-  // console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum);
+  console.log("Finished block processing", blockNumber);
+  console.log(
+    "* * * * * * * TOTAL NUMBER OF ARBITRAGE FOUND:",
+    totalArbitrageCount
+  );
+  console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum);
 }
 
 provider.on("block", async (blockNumber) => {
