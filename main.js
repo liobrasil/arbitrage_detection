@@ -7,16 +7,6 @@ const path = require("path");
 const rawData = fs.readFileSync("./dexFactories.json"); // Adjust the path to your JSON file
 const dexFactories = JSON.parse(rawData);
 
-// Alternatively, read it asynchronously
-fs.readFile("./data.json", "utf8", (err, rawData) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  const jsonData = JSON.parse(rawData);
-  console.log(jsonData);
-});
-
 // Configuration
 const IPC_PATH = "/data/bsc/geth.fast/geth.ipc";
 const KUCOIN_API_URL = "https://api.kucoin.com/api/v1/market/allTickers";
