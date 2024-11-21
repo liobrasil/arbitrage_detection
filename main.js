@@ -288,6 +288,7 @@ const erc20Abi = [
 
 // Factories addresseS
 const dexFactories = {
+  MancakeV3: "0x9c9B67db83DefC0F36e93b26292b41D1051eff5D",
   OwlswapV3_two: "0x30D9e1f894FBc7d2227Dd2a017F955d5586b1e14",
   OwlswapV3_one: "0x126555dd55a39328F69400d6aE4F782Bd4C34ABb",
   DinosaurEggs: "0x73D9F93D53505cB8C4c7f952ae42450d9E859D10",
@@ -2044,11 +2045,11 @@ async function getBalanceChanges(txHash, priceMap) {
 }
 
 // Function to compute the difference between positive and negative values
-function computeValueDifference(toOrFromBalanceChanges) {
+function computeValueDifference(balanceChanges) {
   let valuePositive = 0;
   let valueNegative = 0;
 
-  for (const asset of toOrFromBalanceChanges.assets) {
+  for (const asset of balanceChanges.assets) {
     const value = Number(asset.value); // Get the value of the asset
     if (Number(asset.amount) >= 0) {
       valuePositive += value; // Treat positive amounts as positive values
@@ -2137,7 +2138,10 @@ async function processBlockTransactions(blockNumber) {
 
     const fromAddress = txDetails.from;
 
-    if (toAddress?.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
+    if (
+      !toAddress ||
+      toAddress?.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase()
+    )
       continue;
 
     const {
@@ -2162,20 +2166,12 @@ async function processBlockTransactions(blockNumber) {
       ? computeValueDifference(toAddressBalanceChange)
       : 0;
 
-    const fromAddressBalanceChange = balanceChanges.find(
-      (change) => change.account.toLowerCase() === fromAddress.toLowerCase()
-    );
-    const fromBalanceDifference = fromAddressBalanceChange
-      ? computeValueDifference(fromAddressBalanceChange)
-      : 0;
-
     if (toBalanceDifference > 0) {
       sum += toBalanceDifference;
-    } else if (fromBalanceDifference > 0) {
-      sum += fromBalanceDifference;
     }
 
-    if (toAddressBalanceChange || fromAddressBalanceChange) {
+    if (toAddressBalanceChange) {
+      console.log(JSON.stringify(balanceChanges));
       totalArbitrageCount++;
 
       const logData = {
@@ -2200,7 +2196,7 @@ async function processBlockTransactions(blockNumber) {
         amount_out_usd:
           amountsArray?.[amountsArray.length - 1] *
             priceMap?.[tokenPath?.[tokenPath.length - 1]] || 0,
-        profit_usd: toBalanceDifference || fromBalanceDifference || 0,
+        profit_usd: toBalanceDifference,
       };
 
       writeToLogFile(logData);
@@ -2209,12 +2205,7 @@ async function processBlockTransactions(blockNumber) {
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
       console.log("Bot address:", toAddress);
-      console.log(
-        "Profit in USD:",
-        toBalanceDifference,
-        " || ",
-        fromBalanceDifference
-      );
+      console.log("Profit in USD:", toBalanceDifference);
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
