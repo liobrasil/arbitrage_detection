@@ -286,6 +286,7 @@ const erc20Abi = [
 
 // Factories addresses
 const dexFactories = {
+  P2EFactory: "0x0944AB692786D9104AE9a29778285c41C33c0415",
   Luchow: "0xaF042b1B77240063bc713B9357c39ABedec1b691",
   CoinSwapV1: "0xF964B1b0C64ccFb0854E77Fd2DbEd68D0aADd26c",
   DoubleBinks2: "0x877Fe7F4e22e21bE397Cd9364fAFd4aF4E15Edb6",
@@ -2607,7 +2608,11 @@ async function containsArbitrage(txHash) {
         );
 
         tokenPath.push(tokenInSymbol + "=>" + tokenOutSymbol);
-        amountsArray.push(amounts[0] + "=>" + amounts[1]);
+        amountsArray.push(
+          ethers.formatUnits(amounts[0], tokenInDecimals) +
+            "=>" +
+            ethers.formatUnits(amounts[1], tokenOutDecimals)
+        );
 
         break;
 
