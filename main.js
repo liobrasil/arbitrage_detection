@@ -3059,19 +3059,25 @@ async function processBlockTransactions(blockNumber) {
 
       writeToLogFile(logData);
 
-      console.log("--- Transaction Details", blockNumber);
-      console.log("Position of the transaction in the block:", i);
-      console.log("Transaction hash:", txHash);
-      console.log("Bot address:", toAddress);
-      console.log(
-        "Profit in USD:",
-        dexPath.length == tokenPath.length ? toBalanceDifference : "issue"
-      );
-      console.log("Number of swaps:", swapEventCount);
-      console.log("Dex path:", dexPath);
-      console.log("Token path:", tokenPath);
-      console.log("Amounts: ", amountsArray);
-      console.log("Is valid path: ", isValidPath, "\n\n");
+      if (dexPath.length == tokenPath.length || isValidPath) {
+        console.log("--- Transaction Details", blockNumber);
+        console.log("Position of the transaction in the block:", i);
+        console.log("Transaction hash:", txHash);
+        console.log("Bot address:", toAddress);
+        console.log(
+          "Profit in USD:",
+          dexPath.length == tokenPath.length ? toBalanceDifference : "issue"
+        );
+        console.log("Number of swaps:", swapEventCount);
+        console.log("Dex path:", dexPath);
+        console.log("Token path:", tokenPath);
+        console.log("Amounts: ", amountsArray);
+        console.log(
+          "Is valid path: ",
+          dexPath.length == tokenPath.length && isValidPath,
+          "\n\n"
+        );
+      }
     }
   }
 
