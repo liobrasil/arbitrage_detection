@@ -1467,7 +1467,7 @@ function getTimestamp() {
 }
 
 // Helper function to write data to the log file
-function writeToLogFile(data, blockNumber) {
+function writeToLogFile(data) {
   const logDirectory = "/home/adfl/logs/monitoring";
   const date = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
   const logFileName = `adfl.log.${date}`;
@@ -2084,9 +2084,6 @@ async function processBlockTransactions(blockNumber) {
     }
 
     if (toAddressBalanceChange || fromAddressBalanceChange) {
-      let containRouter = await getInternalTransactions(txHash);
-      if (containRouter) break;
-
       totalArbitrageCount++;
 
       const logData = {
@@ -2110,7 +2107,7 @@ async function processBlockTransactions(blockNumber) {
         profit_usd: toBalanceDifference || fromBalanceDifference || 0,
       };
 
-      writeToLogFile(logData, blockNumber);
+      writeToLogFile(logData);
 
       console.log("--- Transaction Details", blockNumber);
       console.log("Position of the transaction in the block:", i);
