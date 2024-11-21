@@ -1619,20 +1619,34 @@ async function containsArbitrage(txHash) {
         } catch (error) {
           dexPath.push("V2 interface issue");
         }
-        [token0Address, token1Address] = await Promise.all([
-          pairContract.token0(),
-          pairContract.token1(),
-        ]);
-
-        token0Contract = new ethers.Contract(token0Address, erc20Abi, provider);
-        token1Contract = new ethers.Contract(token1Address, erc20Abi, provider);
-        [token0Symbol, token1Symbol, token0Decimals, token1Decimals] =
-          await Promise.all([
-            token0Contract.symbol(),
-            token1Contract.symbol(),
-            token0Contract.decimals(),
-            token1Contract.decimals(),
+        try {
+          [token0Address, token1Address] = await Promise.all([
+            pairContract.token0(),
+            pairContract.token1(),
           ]);
+          token0Contract = new ethers.Contract(
+            token0Address,
+            erc20Abi,
+            provider
+          );
+          token1Contract = new ethers.Contract(
+            token1Address,
+            erc20Abi,
+            provider
+          );
+          [token0Symbol, token1Symbol, token0Decimals, token1Decimals] =
+            await Promise.all([
+              token0Contract.symbol(),
+              token1Contract.symbol(),
+              token0Contract.decimals(),
+              token1Contract.decimals(),
+            ]);
+        } catch (error) {
+          token0Symbol = "Token0_InterfaceIssue";
+          token1Symbol = "Token1_InterfaceIssue";
+          token0Decimals = 18;
+          token1Decimals = 18;
+        }
 
         amounts = ethers.AbiCoder.defaultAbiCoder().decode(
           ["uint256", "uint256", "uint256", "uint256"],
