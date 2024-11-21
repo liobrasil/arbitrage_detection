@@ -1559,7 +1559,8 @@ async function containsArbitrage(txHash) {
   let tokenPath = [];
   let isValidPath = false;
   let amountsArray = [];
-  let newDex = [];
+  let newDexes = [];
+  let venueAddresses = [];
 
   if (!isSuccessful)
     return {
@@ -1569,7 +1570,8 @@ async function containsArbitrage(txHash) {
       tokenPath,
       isValidPath,
       amountsArray,
-      newDex,
+      newDexes,
+      venueAddresses,
     };
 
   const logs = receipt.logs;
@@ -1613,6 +1615,8 @@ async function containsArbitrage(txHash) {
       amount0,
       amount1;
 
+    venueAddresses.push(pairAddress);
+
     switch (log.topics[0]) {
       case swapEventSignatureV2:
         swapEventCount++;
@@ -1622,7 +1626,7 @@ async function containsArbitrage(txHash) {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown")
-            newDex.push(factoryAddress);
+            newDexes.push(factoryAddress);
         } catch (error) {
           dexPath.push("V2 interface issue");
         }
@@ -1681,7 +1685,7 @@ async function containsArbitrage(txHash) {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown")
-            newDex.push(factoryAddress);
+            newDexes.push(factoryAddress);
         } catch (error) {
           dexPath.push("V3 interface issue");
         }
@@ -1739,7 +1743,7 @@ async function containsArbitrage(txHash) {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown")
-            newDex.push(factoryAddress);
+            newDexes.push(factoryAddress);
         } catch (error) {
           dexPath.push("V3 Mancake interface issue");
         }
@@ -1830,7 +1834,8 @@ async function containsArbitrage(txHash) {
       tokenPath,
       isValidPath: isPathValid(tokenPath),
       amountsArray,
-      newDex,
+      newDexes,
+      venueAddresses,
     };
   }
 
@@ -1842,7 +1847,8 @@ async function containsArbitrage(txHash) {
     tokenPath,
     isValidPath,
     amountsArray,
-    newDex,
+    newDexes,
+    venueAddresses,
   };
 }
 
@@ -2155,7 +2161,7 @@ async function processBlockTransactions(blockNumber) {
       hasSwapEvent,
       swapEventCount,
       dexPath,
-      newDex,
+      newDexes,
       tokenPath,
       amountsArray,
       isValidPath,
@@ -2192,9 +2198,9 @@ async function processBlockTransactions(blockNumber) {
         block_number: blockNumber,
         token_path: tokenPath,
         venue_path: dexPath,
-        new_dex: newDex,
+        new_dex: newDexes,
         is_new_dex_verified:
-          newDex.length > 0 ? await checkContractsVerified(newDex) : null,
+          newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
         nb_swap: swapEventCount,
         amount_in: amountsArray?.[0],
         amount_out: amountsArray?.[amountsArray.length - 1] || 0,
