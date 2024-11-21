@@ -288,6 +288,7 @@ const erc20Abi = [
 
 // Factories addresses
 const dexFactories = {
+  CoinOne: "0xB8da6677658b095B43A5725C4ECb6C70125A52e6",
   AugmentFactory: "0x70Ac99C98d0123111a4A4A32d44A9a03667Caed1",
   GravisFactory: "0x4a3B76860C1b76f0403025485DE7bfa1F08C48fD",
   CafeFactory: "0x3e708FdbE3ADA63fc94F8F61811196f1302137AD",
@@ -2187,7 +2188,7 @@ async function processBlockTransactions(blockNumber) {
         from: fromAddress,
         to: toAddress,
         txn_hash: txHash,
-        is_path_value: isValidPath,
+        is_path_valid: isValidPath,
         block_number: blockNumber,
         token_path: tokenPath,
         venue_path: dexPath,
