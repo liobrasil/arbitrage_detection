@@ -2059,7 +2059,7 @@ function computeValueDifference(balanceChanges) {
   }
 
   // Calculate the difference: sum of positive values - sum of negative values
-  const difference = valuePositive - valueNegative;
+  const difference = valuePositive + valueNegative;
   return difference;
 }
 
@@ -2171,7 +2171,6 @@ async function processBlockTransactions(blockNumber) {
     }
 
     if (toAddressBalanceChange) {
-      console.log(JSON.stringify(balanceChanges));
       totalArbitrageCount++;
 
       const logData = {
