@@ -2155,6 +2155,7 @@ async function processBlockTransactions(blockNumber) {
       tokenPath,
       amountsArray,
       isValidPath,
+      venueAddresses,
     } = await containsArbitrage(txHash);
 
     if (!hasSwapEvent) continue;
@@ -2189,6 +2190,7 @@ async function processBlockTransactions(blockNumber) {
         token_path: tokenPath,
         venue_path: dexPath,
         new_dex: newDexes,
+        venues_Addresses: venueAddresses,
         is_new_dex_verified:
           newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
         nb_swap: swapEventCount,
