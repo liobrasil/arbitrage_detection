@@ -2566,6 +2566,8 @@ async function containsArbitrage(txHash) {
         swapEventCount++;
         dexPath.push("Balancer");
 
+        console.log("tokenIn", log.topics[1]);
+        console.log("tokenOut", log.topics[2]);
         try {
           tokenInContract = new ethers.Contract(
             log.topics[1],
