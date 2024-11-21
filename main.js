@@ -16,8 +16,6 @@ const BUILDER_BLOCKSMITH_ADDRESS = "0x0000000000007592b04bB3BB8985402cC37Ca224";
 const BUILDER_BLOCKRAZOR_ADDRESS = "0x1266C6bE60392A8Ff346E8d5ECCd3E69dD9c5F20";
 const BUILDER_BLOXROUTE_ADDRESS = "0x74c5F8C6ffe41AD4789602BDB9a48E6Cad623520";
 
-const PANCAKESWAP_ROUTER_V2 = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
-
 //ERC20 ABI
 const erc20Abi = [
   {
@@ -2089,8 +2087,6 @@ async function getInternalTransactions(txHash) {
           BigInt(log.stack[log.stack.length - 3])
         ); // Extract value
 
-        if (to.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase())
-          return true;
         // Switch-based logic
         if (Number(value) !== 0) {
           switch (to.toLowerCase()) {
@@ -2150,12 +2146,6 @@ async function processBlockTransactions(blockNumber) {
     const toAddress = txDetails?.to; // error pop out
 
     const fromAddress = txDetails.from;
-
-    if (
-      !toAddress ||
-      toAddress?.toLowerCase() === PANCAKESWAP_ROUTER_V2.toLowerCase()
-    )
-      continue;
 
     const {
       hasSwapEvent,
