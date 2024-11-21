@@ -3059,7 +3059,7 @@ async function processBlockTransactions(blockNumber) {
 
       writeToLogFile(logData);
 
-      if (dexPath.length == tokenPath.length || isValidPath) {
+      if (dexPath.length != tokenPath.length || !isValidPath) {
         console.log("--- Transaction Details", blockNumber);
         console.log("Position of the transaction in the block:", i);
         console.log("Transaction hash:", txHash);
