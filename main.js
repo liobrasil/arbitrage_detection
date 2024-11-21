@@ -2191,9 +2191,10 @@ async function processBlockTransactions(blockNumber) {
           newDex.length > 0 ? await checkContractsVerified(newDex) : null,
         nb_swap: swapEventCount,
         amount_in: amountsArray?.[0],
-        amount_in_usd: amountsArray?.[0] * priceMap?.[tokenPath?.[0]] || 0,
         amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-
+        amount_out_usd:
+          amountsArray?.[amountsArray.length - 1] *
+            priceMap?.[tokenPath?.[tokenPath.length - 1]] || 0,
         profit_usd:
           dexPath.length == tokenPath.length ? toBalanceDifference : "issue",
       };
@@ -2204,7 +2205,10 @@ async function processBlockTransactions(blockNumber) {
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
       console.log("Bot address:", toAddress);
-      console.log("Profit in USD:", toBalanceDifference);
+      console.log(
+        "Profit in USD:",
+        dexPath.length == tokenPath.length ? toBalanceDifference : "issue"
+      );
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
       console.log("Token path:", tokenPath);
