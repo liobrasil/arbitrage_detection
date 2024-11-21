@@ -2376,12 +2376,13 @@ async function containsArbitrage(txHash) {
         try {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
-          if (getDexNameByAddress(factoryAddress) == "Unknown")
+          if (getDexNameByAddress(factoryAddress) == "Unknown") {
             newDexes.push(factoryAddress);
-          addFactory(
-            `NewFactory${Object.keys(dexFactories).length}`,
-            factoryAddress
-          );
+            addFactory(
+              `NewFactory${Object.keys(dexFactories).length}`,
+              factoryAddress
+            );
+          }
         } catch (error) {
           dexPath.push("V2 interface issue");
         }
@@ -2440,12 +2441,13 @@ async function containsArbitrage(txHash) {
         try {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
-          if (getDexNameByAddress(factoryAddress) == "Unknown")
+          if (getDexNameByAddress(factoryAddress) == "Unknown") {
             newDexes.push(factoryAddress);
-          addFactory(
-            `NewFactory${Object.keys(dexFactories).length}`,
-            factoryAddress
-          );
+            addFactory(
+              `NewFactory${Object.keys(dexFactories).length}`,
+              factoryAddress
+            );
+          }
         } catch (error) {
           dexPath.push("V3 interface issue");
         }
@@ -2502,12 +2504,13 @@ async function containsArbitrage(txHash) {
         try {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
-          if (getDexNameByAddress(factoryAddress) == "Unknown")
+          if (getDexNameByAddress(factoryAddress) == "Unknown") {
             newDexes.push(factoryAddress);
-          addFactory(
-            `NewFactory${Object.keys(dexFactories).length}`,
-            factoryAddress
-          );
+            addFactory(
+              `NewFactory${Object.keys(dexFactories).length}`,
+              factoryAddress
+            );
+          }
         } catch (error) {
           dexPath.push("V3 Mancake interface issue");
         }
@@ -2630,12 +2633,13 @@ async function containsArbitrage(txHash) {
         try {
           factoryAddress = await pairContract.factory();
           dexPath.push(getDexNameByAddress(factoryAddress));
-          if (getDexNameByAddress(factoryAddress) == "Unknown")
+          if (getDexNameByAddress(factoryAddress) == "Unknown") {
             newDexes.push(factoryAddress);
-          addFactory(
-            `NewFactory${Object.keys(dexFactories).length}`,
-            factoryAddress
-          );
+            addFactory(
+              `NewFactory${Object.keys(dexFactories).length}`,
+              factoryAddress
+            );
+          }
         } catch (error) {
           dexPath.push("smardex interface issue");
         }
