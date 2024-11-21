@@ -1823,7 +1823,60 @@ async function containsArbitrage(txHash) {
         break;
       case swapEventSignatureSmardex:
         swapEventCount++;
-        dexPath.push("Smardex");
+        pairContract = new ethers.Contract(pairAddress, V2Abi, provider);
+
+        try {
+          factoryAddress = await pairContract.factory();
+          dexPath.push(getDexNameByAddress(factoryAddress));
+          if (getDexNameByAddress(factoryAddress) == "Unknown")
+            newDexes.push(factoryAddress);
+        } catch (error) {
+          dexPath.push("smardex interface issue");
+        }
+
+        try {
+          [token0Address, token1Address] = await Promise.all([
+            pairContract.token0(),
+            pairContract.token1(),
+          ]);
+          token0Contract = new ethers.Contract(
+            token0Address,
+            erc20Abi,
+            provider
+          );
+          token1Contract = new ethers.Contract(
+            token1Address,
+            erc20Abi,
+            provider
+          );
+          [token0Symbol, token1Symbol, token0Decimals, token1Decimals] =
+            await Promise.all([
+              token0Contract.symbol(),
+              token1Contract.symbol(),
+              token0Contract.decimals(),
+              token1Contract.decimals(),
+            ]);
+        } catch (error) {
+          token0Symbol = "Token0_InterfaceIssue";
+          token1Symbol = "Token1_InterfaceIssue";
+          token0Decimals = 18;
+          token1Decimals = 18;
+        }
+
+        amounts = ethers.AbiCoder.defaultAbiCoder().decode(
+          ["int256", "int256"],
+          log.data
+        );
+
+        amount0 = ethers.formatUnits(amounts[0], token0Decimals);
+        amount1 = ethers.formatUnits(amounts[1], token1Decimals);
+        if (Number(amount0) < 0) {
+          tokenPath.push(token1Symbol + "=>" + token0Symbol);
+          amountsArray.push(amount1 + "=>" + Math.abs(amount0));
+        } else {
+          tokenPath.push(token0Symbol + "=>" + token1Symbol);
+          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
+        }
         break;
       default:
         break;
@@ -2152,7 +2205,7 @@ async function processBlockTransactions(blockNumber) {
     const txDetails = await provider.getTransaction(txHash);
     const toAddress = txDetails?.to; // error pop out
 
-    const fromAddress = txDetails.from;
+    const fromAddress = txDetails?.from;
 
     const {
       hasSwapEvent,
@@ -2197,7 +2250,7 @@ async function processBlockTransactions(blockNumber) {
         token_path: tokenPath,
         venue_path: dexPath,
         new_dex: newDexes,
-        venues_Addresses: venueAddresses,
+        venues_addresses: venueAddresses,
         is_new_dex_verified:
           newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
         nb_swap: swapEventCount,
