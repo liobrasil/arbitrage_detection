@@ -2167,7 +2167,7 @@ async function processBlockTransactions(blockNumber) {
       ? computeUsdDifference(toAddressBalanceChange)
       : 0;
 
-    if (toBalanceDifference > 0) {
+    if (typeof toBalanceDifference === "number") {
       sum += toBalanceDifference;
     }
 
