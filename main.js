@@ -286,8 +286,13 @@ const erc20Abi = [
   },
 ];
 
-// Factories addresseS
+// Factories addresses
 const dexFactories = {
+  AugmentFactory: "0x70Ac99C98d0123111a4A4A32d44A9a03667Caed1",
+  GravisFactory: "0x4a3B76860C1b76f0403025485DE7bfa1F08C48fD",
+  CafeFactory: "0x3e708FdbE3ADA63fc94F8F61811196f1302137AD",
+  Ampleswap: "0x381fEfaDAB5466BFf0e8e96842e8e76A143E8F73",
+  FinsFactory: "0xe759Dd4B9f99392Be64f1050a6A8018f73B53a13",
   MancakeV3: "0x9c9B67db83DefC0F36e93b26292b41D1051eff5D",
   OwlswapV3_two: "0x30D9e1f894FBc7d2227Dd2a017F955d5586b1e14",
   OwlswapV3_one: "0x126555dd55a39328F69400d6aE4F782Bd4C34ABb",
