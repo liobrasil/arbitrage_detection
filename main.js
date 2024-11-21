@@ -2566,8 +2566,6 @@ async function containsArbitrage(txHash) {
         swapEventCount++;
         dexPath.push("Balancer");
 
-        console.log("tokenIn", log.topics[1]);
-        console.log("tokenOut", log.topics[2]);
         try {
           tokenInContract = new ethers.Contract(
             `0x${log.topics[2].slice(26)}`,
@@ -3083,12 +3081,12 @@ async function processBlockTransactions(blockNumber) {
     }
   }
 
-  console.log("Finished block processing", blockNumber);
-  console.log(
-    "* * * * * * * TOTAL NUMBER OF ARBITRAGE FOUND:",
-    totalArbitrageCount
-  );
-  console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum);
+  // console.log("Finished block processing", blockNumber);
+  // console.log(
+  //   "* * * * * * * TOTAL NUMBER OF ARBITRAGE FOUND:",
+  //   totalArbitrageCount
+  // );
+  // console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum);
 }
 
 provider.on("block", async (blockNumber) => {
