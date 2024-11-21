@@ -1795,7 +1795,7 @@ async function containsArbitrage(txHash) {
           tokenPath.push(token0Symbol + "=>" + token1Symbol);
           amountsArray.push(amount0 + "=>" + Math.abs(amount1));
         }
-
+        break;
       case curveSwapSignature:
         swapEventCount++;
         dexPath.push("Curve");
