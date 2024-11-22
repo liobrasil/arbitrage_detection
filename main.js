@@ -3085,7 +3085,11 @@ async function processBlockTransactions(blockNumber) {
       console.log("Bot address:", toAddress);
       console.log(
         "Profit in USD:",
-        dexPath.length == tokenPath.length ? toBalanceDifference : "issue"
+        dexPath.length == tokenPath.length
+          ? toBalanceDifference != 0
+            ? toBalanceDifference
+            : "incorrect amount"
+          : "issue with number of amounts to investigage"
       );
       console.log("Number of swaps:", swapEventCount);
       console.log("Dex path:", dexPath);
