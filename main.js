@@ -3041,11 +3041,27 @@ async function processBlockTransactions(blockNumber) {
       ? computeUsdDifference(toAddressBalanceChange)
       : 0;
 
+    const fromAddressBalanceChange = balanceChanges.find(
+      (change) => change.account.toLowerCase() === toAddress?.toLowerCase()
+    );
+
+    const fromBalanceDifference = fromAddressBalanceChange
+      ? computeUsdDifference(fromAddressBalanceChange)
+      : 0;
+
     if (typeof toBalanceDifference === "number") {
       sum += toBalanceDifference;
     }
+    if (typeof fromBalanceDifference === "number") {
+      sum += fromBalanceDifference;
+    }
 
-    if (toAddressBalanceChange || toBalanceDifference === 0) {
+    if (
+      toAddressBalanceChange ||
+      toBalanceDifference === 0 ||
+      fromBalanceDifference ||
+      fromBalanceDifference === 0
+    ) {
       totalArbitrageCount++;
 
       const logData = {
