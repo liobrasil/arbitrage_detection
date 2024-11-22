@@ -18,11 +18,7 @@ const readJsonFile = () => {
   }
 };
 
-// Refresh the JSON file every 60 seconds
-let dexFactories = readJsonFile(); // Initial load
-setInterval(() => {
-  dexFactories = readJsonFile(); // Refresh the JSON
-}, 60000); // 60000ms = 60 seconds
+let dexFactories = readJsonFile();
 
 // Function to add a factory
 const addFactory = (key, value) => {
@@ -54,6 +50,10 @@ const addFactory = (key, value) => {
         return;
       }
       console.log("Factory added successfully!");
+
+      // Refresh the dexFactories variable
+      dexFactories = readJsonFile(); // Update the variable after adding
+      console.log("Updated dexFactories:", dexFactories);
     });
   });
 };
