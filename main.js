@@ -3111,10 +3111,34 @@ async function processBlockTransactions(blockNumber) {
   console.log("* * * * * * * SUM OF EXTRACTIBLE VALUE:", sum);
 }
 
-provider.on("block", async (blockNumber) => {
-  console.log(`||| New Block Detected: ${blockNumber}`);
+(async () => {
+  // Get the block number from the command-line arguments
+  const blockNumberArg = process.argv[2];
+
+  if (!blockNumberArg) {
+    console.error("Error: Please provide a block number as an argument.");
+    console.log("Usage: node main.js <blockNumber>");
+    process.exit(1);
+  }
+
+  const blockNumber = parseInt(blockNumberArg, 10);
+
+  if (isNaN(blockNumber)) {
+    console.error("Error: The provided block number is not a valid number.");
+    process.exit(1);
+  }
+
+  console.log(`||| Processing Block: ${blockNumber}`);
   console.time("Processing Time");
-  await processBlockTransactions(blockNumber);
+
+  try {
+    await processBlockTransactions(blockNumber);
+  } catch (error) {
+    console.error("An error occurred while processing the block:", error);
+  }
+
   console.timeEnd("Processing Time");
   console.log("\n\n");
-});
+
+  process.exit(0);
+})();
