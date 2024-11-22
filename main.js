@@ -18,11 +18,7 @@ const readJsonFile = () => {
   }
 };
 
-// Refresh the JSON file every 60 seconds
-let dexFactories = readJsonFile(); // Initial load
-setInterval(() => {
-  dexFactories = readJsonFile(); // Refresh the JSON
-}, 60000); // 60000ms = 60 seconds
+let dexFactories = readJsonFile();
 
 // Function to add a factory
 const addFactory = (key, value) => {
@@ -54,6 +50,10 @@ const addFactory = (key, value) => {
         return;
       }
       console.log("Factory added successfully!");
+
+      // Refresh the dexFactories variable
+      dexFactories = readJsonFile(); // Update the variable after adding
+      console.log("Updated dexFactories:", dexFactories);
     });
   });
 };
@@ -2299,7 +2299,8 @@ function isPathValid(path) {
 // Function to check if the transaction contains at least two "Swap" events (V2, V3, Curve, Balancer, 1inch, Kyber, dYdX)
 async function containsArbitrage(txHash) {
   const receipt = await provider.getTransactionReceipt(txHash);
-  const isSuccessful = receipt.status === 1 && Number(receipt.gasUsed) > 120000;
+  const isSuccessful =
+    receipt?.status === 1 && Number(receipt?.gasUsed) > 120000;
 
   // Initialize counters and path array
   let swapEventCount = 0;
@@ -3040,11 +3041,27 @@ async function processBlockTransactions(blockNumber) {
       ? computeUsdDifference(toAddressBalanceChange)
       : 0;
 
+    const fromAddressBalanceChange = balanceChanges.find(
+      (change) => change.account.toLowerCase() === toAddress?.toLowerCase()
+    );
+
+    const fromBalanceDifference = fromAddressBalanceChange
+      ? computeUsdDifference(fromAddressBalanceChange)
+      : 0;
+
     if (typeof toBalanceDifference === "number") {
       sum += toBalanceDifference;
     }
+    if (typeof fromBalanceDifference === "number") {
+      sum += fromBalanceDifference;
+    }
 
-    if (toAddressBalanceChange || toBalanceDifference === 0) {
+    if (
+      toAddressBalanceChange ||
+      toBalanceDifference === 0 ||
+      fromBalanceDifference ||
+      fromBalanceDifference === 0
+    ) {
       totalArbitrageCount++;
 
       const logData = {
