@@ -3071,8 +3071,10 @@ async function processBlockTransactions(blockNumber) {
             priceMap?.[tokenPath?.[tokenPath.length - 1]] || 0,
         profit_usd:
           dexPath.length == tokenPath.length
-            ? toBalanceDifference
-            : "issue with number of amounts",
+            ? toBalanceDifference != 0
+              ? toBalanceDifference
+              : "incorrect amount"
+            : "issue with number of amounts to investigage",
       };
 
       writeToLogFile(logData);
