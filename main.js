@@ -2299,7 +2299,8 @@ function isPathValid(path) {
 // Function to check if the transaction contains at least two "Swap" events (V2, V3, Curve, Balancer, 1inch, Kyber, dYdX)
 async function containsArbitrage(txHash) {
   const receipt = await provider.getTransactionReceipt(txHash);
-  const isSuccessful = receipt.status === 1 && Number(receipt.gasUsed) > 120000;
+  const isSuccessful =
+    receipt?.status === 1 && Number(receipt?.gasUsed) > 120000;
 
   // Initialize counters and path array
   let swapEventCount = 0;
