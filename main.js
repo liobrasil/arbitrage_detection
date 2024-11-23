@@ -3103,7 +3103,7 @@ async function processBlockTransactions(blockNumber) {
               : tokenPath[tokenPath.length - 1].split("=>")[1] + "-USDT"
           ];
 
-      console.log("amountOutRate", amountOutRate);
+      console.log("BNB-USDT", priceMap["BNB-USDT"]);
 
       const logData = {
         timestamp: getTimestamp(),
