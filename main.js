@@ -3104,6 +3104,15 @@ async function processBlockTransactions(blockNumber) {
           ];
 
       console.log("BNB-USDT", priceMap["BNB-USDT"]);
+      console.log("token out", tokenPath[tokenPath.length - 1].split("=>")[1]);
+      console.log("amount rate out", amountOutRate);
+
+      console.log(
+        "test",
+        tokenPath[tokenPath.length - 1].split("=>")[1] === "WBNB"
+          ? "BNB"
+          : tokenPath[tokenPath.length - 1].split("=>")[1] + "-USDT"
+      );
 
       const logData = {
         timestamp: getTimestamp(),
