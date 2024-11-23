@@ -2296,6 +2296,26 @@ function isPathValid(path) {
   return true;
 }
 
+function getUniqueFormattedPairs(dexPath, tokenPath) {
+  if (dexPath.length !== tokenPath.length) return [];
+  const uniquePairs = [];
+
+  for (let i = 0; i < tokenPath.length; i++) {
+    // Extract tokens for this swap
+    const [tokenA, tokenB] = tokenPath[i].split("=>");
+
+    // Order tokens alphabetically
+    const orderedTokens = [tokenA, tokenB].sort().join("-");
+
+    // Combine dex and ordered token pair
+    if (uniquePairs.includes(`${dexPath[i]}: ${orderedTokens}`)) continue; // Skip if already found
+    uniquePairs.push(`${dexPath[i]}: ${orderedTokens}`);
+  }
+
+  // Convert the set to an array and join with " and " as separator
+  return uniquePairs;
+}
+
 // Function to check if the transaction contains at least two "Swap" events (V2, V3, Curve, Balancer, 1inch, Kyber, dYdX)
 async function containsArbitrage(txHash) {
   const receipt = await provider.getTransactionReceipt(txHash);
@@ -3063,6 +3083,7 @@ async function processBlockTransactions(blockNumber) {
       fromBalanceDifference === 0
     ) {
       totalArbitrageCount++;
+      let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
       const logData = {
         timestamp: getTimestamp(),
@@ -3077,6 +3098,7 @@ async function processBlockTransactions(blockNumber) {
         token_path: tokenPath,
         venue_path: dexPath,
         new_dex: newDexes,
+        hot_pairs: uniqueFormatted,
         venues_addresses: venueAddresses,
         is_new_dex_verified:
           newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
@@ -3100,6 +3122,7 @@ async function processBlockTransactions(blockNumber) {
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
       console.log("Bot address:", toAddress);
+      console.log("Unique formatted pairs:", uniqueFormatted);
       console.log(
         "Profit in USD:",
         dexPath.length == tokenPath.length
