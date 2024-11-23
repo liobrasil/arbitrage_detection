@@ -3011,6 +3011,8 @@ async function getInternalTransactions(txHash) {
               break;
           }
         }
+
+        return { to: value };
       }
     });
 
@@ -3084,6 +3086,7 @@ async function processBlockTransactions(blockNumber) {
     ) {
       totalArbitrageCount++;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
+      await getInternalTransactions(txHash);
 
       console.log("--- Transaction Details", blockNumber);
       console.log("Position of the transaction in the block:", i);
