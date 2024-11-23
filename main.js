@@ -2297,7 +2297,7 @@ function isPathValid(path) {
 }
 
 function getUniqueFormattedPairs(dexPath, tokenPath) {
-  if (dexPath.length !== tokenPath.length) [];
+  if (dexPath.length !== tokenPath.length) return [];
   const uniquePairs = [];
 
   for (let i = 0; i < tokenPath.length; i++) {
@@ -2308,6 +2308,7 @@ function getUniqueFormattedPairs(dexPath, tokenPath) {
     const orderedTokens = [tokenA, tokenB].sort().join("-");
 
     // Combine dex and ordered token pair
+    if (uniquePairs.includes(`${dexPath[i]}: ${orderedTokens}`)) continue; // Skip if already found
     uniquePairs.push(`${dexPath[i]}: ${orderedTokens}`);
   }
 
