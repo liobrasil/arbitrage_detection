@@ -2971,13 +2971,11 @@ async function getInternalTransactions(txHash) {
     // Call debug_traceTransaction
     const trace = await provider.send("debug_traceTransaction", [txHash]);
 
-    let builderAddress, paymentValue;
+    let builderAddress, paymentValue, to, value;
     trace.structLogs.forEach((log) => {
       if (log.op === "CALL" && log.stack.length > 1) {
-        const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
-        const value = ethers.formatEther(
-          BigInt(log.stack[log.stack.length - 3])
-        ); // Extract value
+        to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
+        value = ethers.formatEther(BigInt(log.stack[log.stack.length - 3])); // Extract value
 
         // Switch-based logic
         if (Number(value) !== 0) {
