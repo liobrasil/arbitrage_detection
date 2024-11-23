@@ -3022,7 +3022,8 @@ async function getInternalTransactions(txHash) {
 
 // Updated main function
 async function processBlockTransactions(blockNumber) {
-  let totalArbitrageCount = 0;
+  let totalArbitrageCount = 0,
+    profit_usd_bis = 0;
   let [transactions, priceMap] = await Promise.all([
     fetchTransactions(blockNumber),
     fetchAllPrices(),
@@ -3103,6 +3104,20 @@ async function processBlockTransactions(blockNumber) {
               : tokenPath[tokenPath.length - 1].split("=>")[1] + "-USDT"
           ];
 
+      let amount_in_usd_solo =
+        Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate;
+      let amount_out_usd_solo =
+        Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
+        amountOutRate;
+      if (
+        amount_out_usd_solo &&
+        amount_out_usd_solo != 0 &&
+        amount_in_usd_solo &&
+        amount_in_usd_solo != 0
+      ) {
+        profit_usd_bis = amount_out_usd_solo - amount_in_usd_solo;
+      }
+
       const logData = {
         timestamp: getTimestamp(),
         level: "INFO",
@@ -3138,6 +3153,7 @@ async function processBlockTransactions(blockNumber) {
               ? toBalanceDifference
               : "incorrect amount"
             : "issue with number of amounts to investigage",
+        profit_usd_bis,
       };
 
       writeToLogFile(logData);
