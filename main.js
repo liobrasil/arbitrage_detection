@@ -3115,7 +3115,11 @@ async function processBlockTransactions(blockNumber) {
         amount_in_usd_solo &&
         amount_in_usd_solo != 0
       ) {
-        profit_usd_bis = amount_out_usd_solo - amount_in_usd_solo;
+        if (amount_out_usd_solo == amount_in_usd_solo) {
+          profit_usd_bis = profit_usd;
+        } else {
+          profit_usd_bis = amount_out_usd_solo - amount_in_usd_solo;
+        }
       }
 
       const logData = {
