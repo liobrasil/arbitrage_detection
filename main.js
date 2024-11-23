@@ -3013,7 +3013,10 @@ async function getInternalTransactions(txHash) {
       }
     });
 
-    return { builderAddress: to, paymentValue: value };
+    return {
+      builderAddress: Number(value) != 0 ? to : "",
+      paymentValue: Number(value) != 0 ? Number(value) : "",
+    };
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
   }
