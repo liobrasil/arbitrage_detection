@@ -3116,7 +3116,7 @@ async function processBlockTransactions(blockNumber) {
         amount_in_usd_solo != 0
       ) {
         if (amount_out_usd_solo == amount_in_usd_solo) {
-          profit_usd_bis = profit_usd;
+          profit_usd_bis = toBalanceDifference;
         } else {
           profit_usd_bis = amount_out_usd_solo - amount_in_usd_solo;
         }
