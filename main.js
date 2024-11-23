@@ -3089,11 +3089,15 @@ async function processBlockTransactions(blockNumber) {
         ? 1
         : priceMap[tokenPath[0].split("=>")[0] + "-USDT"];
 
+      console.log("amountInRate", amountInRate);
+
       let amountOutRate = tokenPath[tokenPath.length - 1]
         .split("=>")[1]
         .includes("USD")
         ? 1
         : priceMap[tokenPath[tokenPath.length - 1].split("=>")[1] + "-USDT"];
+
+      console.log("amountOutRate", amountOutRate);
 
       const logData = {
         timestamp: getTimestamp(),
