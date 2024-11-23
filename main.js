@@ -2971,6 +2971,7 @@ async function getInternalTransactions(txHash) {
     // Call debug_traceTransaction
     const trace = await provider.send("debug_traceTransaction", [txHash]);
 
+    let builderAddress, paymentValue;
     trace.structLogs.forEach((log) => {
       if (log.op === "CALL" && log.stack.length > 1) {
         const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
@@ -3011,12 +3012,10 @@ async function getInternalTransactions(txHash) {
               break;
           }
         }
-
-        return { to: value };
       }
     });
 
-    return false;
+    return { builderAddress, paymentValue };
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
   }
@@ -3086,10 +3085,14 @@ async function processBlockTransactions(blockNumber) {
     ) {
       totalArbitrageCount++;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
-      await getInternalTransactions(txHash);
+      let { builderAddress, paymentValue } = await getInternalTransactions(
+        txHash
+      );
 
       console.log("--- Transaction Details", blockNumber);
       console.log("Position of the transaction in the block:", i);
+      console.log("BuilderAddress", builderAddress);
+      console.log("PaymentValue", paymentValue);
       console.log("Transaction hash:", txHash);
       console.log("Bot address:", toAddress);
       console.log("Unique formatted pairs:", uniqueFormatted);
