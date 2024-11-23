@@ -3103,6 +3103,10 @@ async function processBlockTransactions(blockNumber) {
         is_new_dex_verified:
           newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
         nb_swap: swapEventCount,
+        amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
+        amount_out_solo: Number(
+          amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
+        ),
         amount_in: amountsArray?.[0],
         amount_out: amountsArray?.[amountsArray.length - 1] || 0,
         amount_out_usd:
