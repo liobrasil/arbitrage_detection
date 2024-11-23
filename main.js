@@ -2297,10 +2297,7 @@ function isPathValid(path) {
 }
 
 function getUniqueFormattedPairs(dexPath, tokenPath) {
-  if (dexPath.length !== tokenPath.length) {
-    throw new Error("Mismatch between dexPath and tokenPath lengths.");
-  }
-
+  if (dexPath.length !== tokenPath.length) [];
   const uniquePairs = [];
 
   for (let i = 0; i < tokenPath.length; i++) {
