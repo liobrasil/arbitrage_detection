@@ -3085,39 +3085,6 @@ async function processBlockTransactions(blockNumber) {
       totalArbitrageCount++;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
-      const logData = {
-        timestamp: getTimestamp(),
-        level: "INFO",
-        _type: "MevAnalyse",
-        _appid: "adfl_bsc_mev_analyse",
-        from: fromAddress,
-        to: toAddress,
-        txn_hash: txHash,
-        is_path_valid: dexPath.length == tokenPath.length && isValidPath,
-        block_number: blockNumber,
-        token_path: tokenPath,
-        venue_path: dexPath,
-        new_dex: newDexes,
-        hot_pairs: uniqueFormatted,
-        venues_addresses: venueAddresses,
-        is_new_dex_verified:
-          newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
-        nb_swap: swapEventCount,
-        amount_in: amountsArray?.[0],
-        amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-        amount_out_usd:
-          amountsArray?.[amountsArray.length - 1] *
-            priceMap?.[tokenPath?.[tokenPath.length - 1]] || 0,
-        profit_usd:
-          dexPath.length == tokenPath.length
-            ? toBalanceDifference != 0
-              ? toBalanceDifference
-              : "incorrect amount"
-            : "issue with number of amounts to investigage",
-      };
-
-      writeToLogFile(logData);
-
       console.log("--- Transaction Details", blockNumber);
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
