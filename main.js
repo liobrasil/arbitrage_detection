@@ -3022,8 +3022,7 @@ async function getInternalTransactions(txHash) {
 
 // Updated main function
 async function processBlockTransactions(blockNumber) {
-  let totalArbitrageCount = 0,
-    profit_usd_bis = 0;
+  let totalArbitrageCount = 0;
   let [transactions, priceMap] = await Promise.all([
     fetchTransactions(blockNumber),
     fetchAllPrices(),
@@ -3032,6 +3031,7 @@ async function processBlockTransactions(blockNumber) {
   let sum = 0;
 
   for (let i = 0; i < transactions.length; i++) {
+    let profit_usd_bis = 0;
     const txHash = transactions[i];
 
     const txDetails = await provider.getTransaction(txHash);
