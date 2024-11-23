@@ -2301,7 +2301,7 @@ function getUniqueFormattedPairs(dexPath, tokenPath) {
     throw new Error("Mismatch between dexPath and tokenPath lengths.");
   }
 
-  const uniquePairs = new Set();
+  const uniquePairs = [];
 
   for (let i = 0; i < tokenPath.length; i++) {
     // Extract tokens for this swap
@@ -2311,11 +2311,11 @@ function getUniqueFormattedPairs(dexPath, tokenPath) {
     const orderedTokens = [tokenA, tokenB].sort().join("-");
 
     // Combine dex and ordered token pair
-    uniquePairs.add(`${dexPath[i]}: ${orderedTokens}`);
+    uniquePairs.push(`${dexPath[i]}: ${orderedTokens}`);
   }
 
   // Convert the set to an array and join with " and " as separator
-  return Array.from(uniquePairs).join(" and ");
+  return uniquePairs;
 }
 
 // Function to check if the transaction contains at least two "Swap" events (V2, V3, Curve, Balancer, 1inch, Kyber, dYdX)
