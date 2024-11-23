@@ -2971,7 +2971,7 @@ async function getInternalTransactions(txHash) {
     // Call debug_traceTransaction
     const trace = await provider.send("debug_traceTransaction", [txHash]);
 
-    let builderAddress, paymentValue, to, value;
+    let to, value;
     trace.structLogs.forEach((log) => {
       if (log.op === "CALL" && log.stack.length > 1) {
         to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
@@ -3013,7 +3013,7 @@ async function getInternalTransactions(txHash) {
       }
     });
 
-    return { builderAddress, paymentValue };
+    return { builderAddress: to, paymentValue: value };
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
   }
