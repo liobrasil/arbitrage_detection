@@ -3087,15 +3087,21 @@ async function processBlockTransactions(blockNumber) {
 
       let amountInRate = tokenPath[0].split("=>")[0].includes("USD")
         ? 1
-        : priceMap[tokenPath[0].split("=>")[0] + "-USDT"];
-
-      console.log("amountInRate", amountInRate);
+        : priceMap[
+            tokenPath[0].split("=>")[0] === "WBNB"
+              ? "BNB"
+              : tokenPath[0].split("=>")[0] + "-USDT"
+          ];
 
       let amountOutRate = tokenPath[tokenPath.length - 1]
         .split("=>")[1]
         .includes("USD")
         ? 1
-        : priceMap[tokenPath[tokenPath.length - 1].split("=>")[1] + "-USDT"];
+        : priceMap[
+            tokenPath[tokenPath.length - 1].split("=>")[1] === "WBNB"
+              ? "BNB"
+              : tokenPath[tokenPath.length - 1].split("=>")[1] + "-USDT"
+          ];
 
       console.log("amountOutRate", amountOutRate);
 
