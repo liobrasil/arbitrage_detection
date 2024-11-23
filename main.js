@@ -3085,6 +3085,16 @@ async function processBlockTransactions(blockNumber) {
       totalArbitrageCount++;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
+      let amountInRate = tokenPath[0].split("=>")[0].includes("USD")
+        ? 1
+        : priceMap[tokenPath[0].split("=>")[0] + "-USDT"];
+
+      let amountOutRate = tokenPath[tokenPath.length - 1]
+        .split("=>")[1]
+        .includes("USD")
+        ? 1
+        : priceMap[tokenPath[tokenPath.length - 1].split("=>")[1] + "-USDT"];
+
       const logData = {
         timestamp: getTimestamp(),
         level: "INFO",
@@ -3107,11 +3117,13 @@ async function processBlockTransactions(blockNumber) {
         amount_out_solo: Number(
           amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
         ),
+        amount_in_usd_solo:
+          Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
+        amount_out_usd_solo:
+          Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
+          amountOutRate,
         amount_in: amountsArray?.[0],
         amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-        amount_out_usd:
-          amountsArray?.[amountsArray.length - 1] *
-            priceMap?.[tokenPath?.[tokenPath.length - 1]] || 0,
         profit_usd:
           dexPath.length == tokenPath.length
             ? toBalanceDifference != 0
