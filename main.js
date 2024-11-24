@@ -3109,6 +3109,7 @@ async function processBlockTransactions(blockNumber) {
       let amount_out_usd_solo =
         Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
         amountOutRate;
+
       if (
         amount_out_usd_solo &&
         amount_out_usd_solo != 0 &&
