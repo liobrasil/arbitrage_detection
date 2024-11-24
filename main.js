@@ -3158,7 +3158,7 @@ async function processBlockTransactions(blockNumber) {
               ? toBalanceDifference
               : "incorrect amount"
             : "issue with number of amounts to investigage",
-        profit_usd_bis,
+        profit_usd_bis: profit_usd_bis,
       };
 
       writeToLogFile(logData);
