@@ -20,6 +20,8 @@ const readJsonFile = () => {
 
 let dexFactories = readJsonFile();
 
+const OUR_CONTRACT_ADDRESS = "0xA08A96303ABcAf78789104567cC59ba891dE0864";
+const BSCSCAN_API_KEY = "71XH1XIDNUERIVZ7P8YUUE41K7EZT7245S";
 // Function to add a factory
 const addFactory = (key, value) => {
   // Read the existing JSON data
@@ -343,7 +345,7 @@ async function checkContractsVerified(contractAddresses) {
   const results = [];
 
   for (const address of contractAddresses) {
-    const url = `https://api.bscscan.com/api?module=contract&action=getabi&address=${address}&apikey=71XH1XIDNUERIVZ7P8YUUE41K7EZT7245S`;
+    const url = `https://api.bscscan.com/api?module=contract&action=getabi&address=${address}&apikey=${BSCSCAN_API_KEY}`;
     try {
       const response = await axios.get(url);
       const data = response.data;
@@ -362,6 +364,76 @@ async function checkContractsVerified(contractAddresses) {
   }
 
   return results;
+}
+
+async function getOurBotUsdBalance(priceMap) {
+  let walletAddress = OUR_CONTRACT_ADDRESS;
+
+  // Token addresses from your portfolio
+  const tokens = [
+    { symbol: "WBNB", address: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" },
+    { symbol: "USDT", address: "0x55d398326f99059fF775485246999027B3197955" },
+    { symbol: "BUSD", address: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56" },
+    { symbol: "ETH", address: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8" },
+    { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d" },
+    { symbol: "BTCB", address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c" },
+    { symbol: "ADA", address: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47" },
+    { symbol: "MATIC", address: "0xCC42724C6683B7E57334c4E856f4c9965ED682bD" },
+    { symbol: "DAI", address: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3" },
+  ];
+
+  const balances = [];
+
+  for (const token of tokens) {
+    try {
+      const contract = new ethers.Contract(token.address, erc20Abi, provider);
+
+      // Get balance and decimals in parallel
+      const [balance, decimals] = await Promise.all([
+        contract.balanceOf(walletAddress),
+        contract.decimals(),
+      ]);
+
+      // Convert balance to human readable format
+      const formattedBalance = ethers.formatUnits(balance, decimals);
+
+      // Handle WBNB to BNB symbol conversion
+      let symbol = token.symbol;
+      if (symbol === "WBNB") {
+        symbol = "BNB";
+      }
+
+      // Create symbol pairs for price mapping
+      const symbolToUSDT = `${symbol}-USDT`;
+      const symbolToUSDC = `${symbol}-USDC`;
+      const symbolToUSD = `${symbol}-USD`;
+
+      // Fetch the price from the price map
+      const priceInUSD =
+        priceMap[symbolToUSDT] ||
+        priceMap[symbolToUSDC] ||
+        priceMap[symbolToUSD] ||
+        0;
+
+      balances.push({
+        symbol: token.symbol,
+        address: token.address,
+        balance: formattedBalance,
+        rawBalance: balance.toString(),
+        priceUSD: priceInUSD,
+        valueUSD: parseFloat(formattedBalance) * priceInUSD,
+      });
+    } catch (error) {
+      console.error(
+        `Error fetching balance for ${token.symbol}:`,
+        error.message
+      );
+    }
+  }
+
+  // Calculate total portfolio value
+  const totalValue = balances.reduce((sum, token) => sum + token.valueUSD, 0);
+  return totalValue;
 }
 
 // Function to find the DEX name by address
@@ -3110,6 +3182,9 @@ async function processBlockTransactions(blockNumber) {
         Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
         amountOutRate;
 
+      let tokenIn = tokenPath[0].split("=>")[0];
+      let tokenOut = tokenPath[tokenPath.length - 1].split("=>")[1];
+
       if (
         amount_out_usd_solo &&
         amount_out_usd_solo != 0 &&
@@ -3137,6 +3212,12 @@ async function processBlockTransactions(blockNumber) {
         venue_path: dexPath,
         new_dex: newDexes,
         hot_pairs: uniqueFormatted,
+        bot_balance:
+          toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
+            ? Number(await getOurBotUsdBalance(priceMap))
+            : 0,
+        token_in: tokenIn,
+        token_out: tokenOut,
         venues_addresses: venueAddresses,
         is_new_dex_verified:
           newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
@@ -3167,6 +3248,12 @@ async function processBlockTransactions(blockNumber) {
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
       console.log("Bot address:", toAddress);
+      console.log(
+        "Our Bot balance:",
+        toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
+          ? await getOurBotUsdBalance(priceMap)
+          : null
+      );
       console.log("Unique formatted pairs:", uniqueFormatted);
       console.log(
         "Profit in USD:",
