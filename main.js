@@ -2464,7 +2464,7 @@ async function fetchContractCode(contractAddress) {
 
     const { data } = response;
 
-    console.log("data1 -------", JSON.parse(data.result[0].SourceCode));
+    console.log("data1 -------", data);
     console.log(
       "data2 -------",
       JSON.parse(data.result[0].SourceCode).replace(/\r\n/g, "\n")
@@ -2476,7 +2476,7 @@ async function fetchContractCode(contractAddress) {
       abi: JSON.stringify(JSON.parse(data.result[0].ABI), 2, null),
     };
   } catch (error) {
-    console.log(error);
+    console.log("error merde", error);
     return {
       sourceCode: "",
       contractName: "",
