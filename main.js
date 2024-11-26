@@ -22,10 +22,50 @@ let dexFactories = readJsonFile();
 
 const OUR_CONTRACT_ADDRESS = "0xA08A96303ABcAf78789104567cC59ba891dE0864";
 const BSCSCAN_API_KEY = "71XH1XIDNUERIVZ7P8YUUE41K7EZT7245S";
+
+const extractMultipliers = (code) => {
+  try {
+    // Regular expressions to match base and fee multipliers
+    const base0Pattern = /balance0\.mul\((\d+)\)/;
+    const base1Pattern = /balance1\.mul\((\d+)\)/;
+    const fee0Pattern = /amount0In\.mul\((\d+)\)/;
+    const fee1Pattern = /amount1In\.mul\((\d+)\)/;
+
+    // Find matches
+    const base0Match = code.match(base0Pattern);
+    const base1Match = code.match(base1Pattern);
+    const fee0Match = code.match(fee0Pattern);
+    const fee1Match = code.match(fee1Pattern);
+
+    if ((!base0Match && !fee0Match) || (!base1Match && !fee1Match)) {
+      return {
+        success: false,
+        error: "Could not find all multipliers",
+      };
+    }
+
+    // Extract values
+    const base0 = parseInt(base0Match[1]);
+    const base1 = parseInt(base1Match[1]);
+    const fee0 = parseInt(fee0Match[1]);
+    const fee1 = parseInt(fee1Match[1]);
+
+    return {
+      success: true,
+      fee: (fee0 * 100 * 10000) / base0,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
 // Function to add a factory
-const addFactory = (key, value) => {
+const addFactory = async (key, value) => {
   // Read the existing JSON data
-  fs.readFile(filePath, "utf8", (err, data) => {
+  fs.readFile(filePath, "utf8", async (err, data) => {
     if (err) {
       console.error("Error reading file:", err);
       return;
@@ -40,6 +80,29 @@ const addFactory = (key, value) => {
     if (addressExists) {
       console.log(`Address ${value} already exists. Skipping.`);
       return;
+    }
+
+    const isContractVerified = await checkContractsVerified([key]);
+
+    if (isContractVerified.length > 0) {
+      const contractDatas = await fetchContractCode(toAddress);
+      const multipliers = extractMultipliers(contractDatas.sourceCode);
+
+      if (multipliers.success) {
+        console.log("FEEEEESSSSS ---------", multipliers.fee);
+        const logNewContract = {
+          ...{
+            timestamp: getTimestamp(),
+            level: "INFO",
+            _type: "NewDexes",
+            _appid: "adfl_bsc_mev_analyse",
+          },
+          ...contractDatas,
+          fees: multipliers.fee,
+        };
+
+        writeToLogFile(logNewContract);
+      }
     }
 
     // Add the new factory
@@ -2388,6 +2451,33 @@ function getUniqueFormattedPairs(dexPath, tokenPath) {
   return uniquePairs;
 }
 
+async function fetchContractCode(contractAddress) {
+  try {
+    const response = await axios.get("https://api.bscscan.com/api", {
+      params: {
+        module: "contract",
+        action: "getsourcecode",
+        address: contractAddress,
+        apikey: BSCSCAN_API_KEY,
+      },
+    });
+
+    const { data } = response;
+
+    return {
+      sourceCode: JSON.parse(data.result[0].SourceCode).replace(/\r\n/g, "\n"),
+      contractName: data.result[0].ContractName,
+      abi: JSON.stringify(JSON.parse(data.result[0].ABI), 2, null),
+    };
+  } catch (error) {
+    return {
+      sourceCode: "",
+      contractName: "",
+      abi: "",
+    };
+  }
+}
+
 // Function to check if the transaction contains at least two "Swap" events (V2, V3, Curve, Balancer, 1inch, Kyber, dYdX)
 async function containsArbitrage(txHash) {
   const receipt = await provider.getTransactionReceipt(txHash);
@@ -2483,7 +2573,7 @@ async function containsArbitrage(txHash) {
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown") {
             newDexes.push(factoryAddress);
-            addFactory(
+            await addFactory(
               `NewFactory${Object.keys(dexFactories).length}`,
               factoryAddress
             );
@@ -2548,7 +2638,7 @@ async function containsArbitrage(txHash) {
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown") {
             newDexes.push(factoryAddress);
-            addFactory(
+            await addFactory(
               `NewFactory${Object.keys(dexFactories).length}`,
               factoryAddress
             );
@@ -2611,7 +2701,7 @@ async function containsArbitrage(txHash) {
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown") {
             newDexes.push(factoryAddress);
-            addFactory(
+            await addFactory(
               `NewFactory${Object.keys(dexFactories).length}`,
               factoryAddress
             );
@@ -2756,7 +2846,7 @@ async function containsArbitrage(txHash) {
           dexPath.push(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown") {
             newDexes.push(factoryAddress);
-            addFactory(
+            await addFactory(
               `NewFactory${Object.keys(dexFactories).length}`,
               factoryAddress
             );
