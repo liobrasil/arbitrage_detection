@@ -2428,16 +2428,28 @@ async function containsArbitrage(txHash) {
     "Swap(address,address,int256,int256,uint160,uint128,int24,uint128,uint128)"
   );
   const curveSwapSignature = ethers.id(
-    "TokenExchange(address,int128,uint256,int128,uint256)"
+    "TokenExchangeUnderlying(address,int128,uint256,int128,uint256)"
+  );
+  const curveSwapSignatureNew = ethers.id(
+    "TokenExchangeUnderlying(address,uint256,uint256,uint256,uint256)"
   );
   const balancerSwapSignature = ethers.id(
     "Swap(bytes32,address,address,uint256,uint256)"
   );
   const oneInchSwapSignature = ethers.id(
-    "OrderFilled(address,address,uint256,uint256)"
+    "Swapped(address,address,address,address,uint256,uint256)"
+  );
+  const NerveSignature = ethers.id(
+    "TokenSwap(address,uint256,uint256,uint128,uint128)"
   );
   const kyberSwapSignature = ethers.id(
-    "KyberSwap(address,address,address,uint256,uint256)"
+    "Swap(address,address,uint256,uint256,uint256,uint256)"
+  );
+  const DODOSwapSignature = ethers.id(
+    "DODOSwap(address,address,uint256,uint256,uint256, address, address)"
+  );
+  const MDEXV3SwapSignature = ethers.id(
+    "SwapV3(address,address,bool,uint256,uint256, int24)"
   );
   const dydxTradeSignature = ethers.id(
     "LogTrade(address,address,address,uint256,uint256)"
@@ -2663,6 +2675,22 @@ async function containsArbitrage(txHash) {
       case curveSwapSignature:
         swapEventCount++;
         dexPath.push("Curve");
+        break;
+      case curveSwapSignatureNew:
+        swapEventCount++;
+        dexPath.push("CurveNew");
+        break;
+      case DODOSwapSignature:
+        swapEventCount++;
+        dexPath.push("DODOSwap");
+        break;
+      case MDEXV3SwapSignature:
+        swapEventCount++;
+        dexPath.push("MDEXV3");
+        break;
+      case NerveSignature:
+        swapEventCount++;
+        dexPath.push("Nerve");
         break;
       case balancerSwapSignature:
         swapEventCount++;
