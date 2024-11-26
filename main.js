@@ -3198,6 +3198,11 @@ async function processBlockTransactions(blockNumber) {
         }
       }
 
+      let botBalance =
+        toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
+          ? Number(await getOurBotUsdBalance(priceMap))
+          : 0;
+
       const logData = {
         timestamp: getTimestamp(),
         level: "INFO",
@@ -3212,10 +3217,7 @@ async function processBlockTransactions(blockNumber) {
         venue_path: dexPath,
         new_dex: newDexes,
         hot_pairs: uniqueFormatted,
-        bot_balance:
-          toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
-            ? Number(await getOurBotUsdBalance(priceMap))
-            : 0,
+        bot_balance: botBalance,
         token_in: tokenIn,
         token_out: tokenOut,
         venues_addresses: venueAddresses,
@@ -3248,12 +3250,6 @@ async function processBlockTransactions(blockNumber) {
       console.log("Position of the transaction in the block:", i);
       console.log("Transaction hash:", txHash);
       console.log("Bot address:", toAddress);
-      console.log(
-        "Our Bot balance:",
-        toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
-          ? await getOurBotUsdBalance(priceMap)
-          : null
-      );
       console.log("Unique formatted pairs:", uniqueFormatted);
       console.log(
         "Profit in USD:",
