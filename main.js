@@ -2457,14 +2457,9 @@ function getUniqueFormattedPairs(dexPath, tokenPath) {
 
 async function fetchContractCode(contractAddress) {
   try {
-    const response = await axios.get("https://api.bscscan.com/api", {
-      params: {
-        module: "contract",
-        action: "getsourcecode",
-        address: contractAddress,
-        apikey: BSCSCAN_API_KEY,
-      },
-    });
+    const response = await axios.get(
+      `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`
+    );
 
     const { data } = response;
 
