@@ -85,7 +85,6 @@ const addFactory = async (key, value) => {
     const isContractVerified = await checkContractsVerified([value]);
 
     if (isContractVerified.length > 0 && isContractVerified[0].verified) {
-      console.log("Oh yeah");
       const contractDatas = await fetchContractCode(value);
 
       console.log("contract data", contractDatas);
@@ -2464,11 +2463,7 @@ async function fetchContractCode(contractAddress) {
 
     const { data } = response;
 
-    console.log("data1 -------", data);
-    console.log(
-      "data2 -------",
-      JSON.parse(data.result[0].SourceCode).replace(/\r\n/g, "\n")
-    );
+    console.log("data2 -------", JSON.parse(data.result[0].SourceCode));
 
     return {
       sourceCode: JSON.parse(data.result[0].SourceCode).replace(/\r\n/g, "\n"),
