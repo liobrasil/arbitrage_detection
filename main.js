@@ -2462,10 +2462,10 @@ async function fetchContractCode(contractAddress) {
 
     const { data } = response;
 
-    console.log("test", data.result[0].SourceCode);
+    console.log("test", data.result[0].SourceCode.replace(/\r\n/g, " "));
 
     return {
-      sourceCode: data.result[0].SourceCode.replace(/\r\n/g, "\n"),
+      sourceCode: data.result[0].SourceCode.replace(/\r\n/g, " "),
       contractName: data.result[0].ContractName,
       abi: JSON.stringify(JSON.parse(data.result[0].ABI), 2, null),
     };
