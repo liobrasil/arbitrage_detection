@@ -2462,6 +2462,8 @@ async function fetchContractCode(contractAddress) {
 
     const { data } = response;
 
+    console.log("test", data.result[0].SourceCode);
+
     return {
       sourceCode: data.result[0].SourceCode.replace(/\r\n/g, "\n"),
       contractName: data.result[0].ContractName,
