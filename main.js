@@ -82,16 +82,11 @@ const addFactory = async (key, value) => {
       return;
     }
 
-    const isContractVerified = await checkContractsVerified([key]);
+    const isContractVerified = await checkContractsVerified([value]);
 
     if (isContractVerified.length > 0) {
-      console.log("key   :", key);
-      const contractDatas = await fetchContractCode(key);
-      console.log("Contract Data Source code", contractDatas.sourceCode);
-
+      const contractDatas = await fetchContractCode(value);
       const multipliers = extractMultipliers(contractDatas.sourceCode);
-
-      console.log(multipliers);
 
       if (multipliers.success) {
         console.log("FEEEEESSSSS ---------", multipliers.fee);
@@ -2463,7 +2458,7 @@ async function fetchContractCode(contractAddress) {
     );
 
     const { data } = response;
-    console.log(data);
+
     return {
       sourceCode: JSON.parse(data.result[0].SourceCode).replace(/\r\n/g, "\n"),
       contractName: data.result[0].ContractName,
