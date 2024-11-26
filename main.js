@@ -3204,44 +3204,46 @@ async function processBlockTransactions(blockNumber) {
           : 0;
 
       const logData = {
-        timestamp: getTimestamp(),
-        level: "INFO",
-        _type: "MevAnalyse",
-        _appid: "adfl_bsc_mev_analyse",
-        from: fromAddress,
-        to: toAddress,
-        txn_hash: txHash,
-        is_path_valid: dexPath.length == tokenPath.length && isValidPath,
-        block_number: blockNumber,
-        token_path: tokenPath,
-        venue_path: dexPath,
-        new_dex: newDexes,
-        hot_pairs: uniqueFormatted,
-        bot_balance: botBalance,
-        token_in_bis: tokenIn,
-        token_out_bis: tokenOut,
-        venues_addresses: venueAddresses,
-        is_new_dex_verified:
-          newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
-        nb_swap: swapEventCount,
-        amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
-        amount_out_solo: Number(
-          amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
-        ),
-        amount_in_usd_solo:
-          Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
-        amount_out_usd_solo:
-          Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
-          amountOutRate,
-        amount_in: amountsArray?.[0],
-        amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-        profit_usd:
-          dexPath.length == tokenPath.length
-            ? toBalanceDifference != 0
-              ? toBalanceDifference
-              : "incorrect amount"
-            : "issue with number of amounts to investigage",
-        profit_usd_bis: profit_usd_bis,
+        ...{
+          timestamp: getTimestamp(),
+          level: "INFO",
+          _type: "MevAnalyse",
+          _appid: "adfl_bsc_mev_analyse",
+          from: fromAddress,
+          to: toAddress,
+          txn_hash: txHash,
+          is_path_valid: dexPath.length == tokenPath.length && isValidPath,
+          block_number: blockNumber,
+          token_path: tokenPath,
+          venue_path: dexPath,
+          new_dex: newDexes,
+          hot_pairs: uniqueFormatted,
+          token_in_bis: tokenIn,
+          token_out_bis: tokenOut,
+          venues_addresses: venueAddresses,
+          is_new_dex_verified:
+            newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
+          nb_swap: swapEventCount,
+          amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
+          amount_out_solo: Number(
+            amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
+          ),
+          amount_in_usd_solo:
+            Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
+          amount_out_usd_solo:
+            Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
+            amountOutRate,
+          amount_in: amountsArray?.[0],
+          amount_out: amountsArray?.[amountsArray.length - 1] || 0,
+          profit_usd:
+            dexPath.length == tokenPath.length
+              ? toBalanceDifference != 0
+                ? toBalanceDifference
+                : "incorrect amount"
+              : "issue with number of amounts to investigage",
+          profit_usd_bis: profit_usd_bis,
+        },
+        ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
       };
 
       writeToLogFile(logData);
