@@ -3198,10 +3198,10 @@ async function processBlockTransactions(blockNumber) {
         }
       }
 
-      let botBalance =
-        toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
-          ? Number(await getOurBotUsdBalance(priceMap))
-          : 0;
+      // let botBalance =
+      //   toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
+      //     ? Number(await getOurBotUsdBalance(priceMap))
+      //     : 0;
 
       const logData = {
         timestamp: getTimestamp(),
@@ -3217,7 +3217,6 @@ async function processBlockTransactions(blockNumber) {
         venue_path: dexPath,
         new_dex: newDexes,
         hot_pairs: uniqueFormatted,
-        bot_balance: botBalance,
         token_in: tokenIn,
         token_out: tokenOut,
         venues_addresses: venueAddresses,
