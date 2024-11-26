@@ -2455,7 +2455,6 @@ function getUniqueFormattedPairs(dexPath, tokenPath) {
 }
 
 async function fetchContractCode(contractAddress) {
-  console.log("minks binin");
   try {
     const response = await axios.get(
       `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`
@@ -2463,7 +2462,7 @@ async function fetchContractCode(contractAddress) {
 
     const { data } = response;
 
-    console.log("data2 -------", JSON.parse(data.result[0].SourceCode));
+    console.log("data2 -------", data.result[0].SourceCode);
 
     return {
       sourceCode: JSON.parse(data.result[0].SourceCode).replace(/\r\n/g, "\n"),
