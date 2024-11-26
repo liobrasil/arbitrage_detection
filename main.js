@@ -3237,10 +3237,8 @@ async function processBlockTransactions(blockNumber) {
           amount_out: amountsArray?.[amountsArray.length - 1] || 0,
           profit_usd:
             dexPath.length == tokenPath.length
-              ? toBalanceDifference != 0
-                ? toBalanceDifference
-                : "incorrect amount"
-              : "issue with number of amounts to investigage",
+              ? Number(toBalanceDifference)
+              : 0,
           profit_usd_bis: profit_usd_bis,
         },
         ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
