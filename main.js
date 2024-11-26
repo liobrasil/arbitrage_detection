@@ -2428,7 +2428,7 @@ async function containsArbitrage(txHash) {
     "Swap(address,address,int256,int256,uint160,uint128,int24,uint128,uint128)"
   );
   const curveSwapSignature = ethers.id(
-    "TokenExchangeUnderlying(address,int128,uint256,int128,uint256)"
+    "TokenExchange(address,int128,uint256,int128,uint256)"
   );
   const curveSwapSignatureNew = ethers.id(
     "TokenExchangeUnderlying(address,uint256,uint256,uint256,uint256)"
