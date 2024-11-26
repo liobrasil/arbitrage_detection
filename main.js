@@ -86,7 +86,11 @@ const addFactory = async (key, value) => {
 
     if (isContractVerified.length > 0) {
       const contractDatas = await fetchContractCode(key);
+      console.log("Contract Data Source code", contractDatas.sourceCode);
+
       const multipliers = extractMultipliers(contractDatas.sourceCode);
+
+      console.log(multipliers);
 
       if (multipliers.success) {
         console.log("FEEEEESSSSS ---------", multipliers.fee);
