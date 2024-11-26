@@ -2461,8 +2461,10 @@ async function fetchContractCode(contractAddress) {
 
     const { data } = response;
 
-    console.log("data -------", data.result[0].SourceCode);
-    console.log("object keys ------", Object.keys(data.result[0].SourceCode));
+    console.log(
+      "data -------",
+      JSON.parse(data.result[0].SourceCode).replace(/\r\n/g, "\n")
+    );
 
     return {
       sourceCode: JSON.parse(data.result[0].SourceCode).replace(/\r\n/g, "\n"),
