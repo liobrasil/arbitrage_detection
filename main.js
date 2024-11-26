@@ -2463,7 +2463,7 @@ async function fetchContractCode(contractAddress) {
     const { data } = response;
 
     return {
-      sourceCode: data.result[0].SourceCode,
+      sourceCode: data.result[0].SourceCode.replace(/\r\n/g, "\n"),
       contractName: data.result[0].ContractName,
       abi: JSON.stringify(JSON.parse(data.result[0].ABI), 2, null),
     };
