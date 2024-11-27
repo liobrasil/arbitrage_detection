@@ -2932,6 +2932,7 @@ async function containsArbitrage(txHash) {
       amountsArray,
       newDexes,
       venueAddresses,
+      gasUsed: receipt.gasUsed,
     };
   }
 
@@ -3193,35 +3194,51 @@ async function getInternalTransactions(txHash) {
           switch (to.toLowerCase()) {
             case BUILDER_PUISSANT_ADDRESS.toLowerCase():
               console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
-              return { builder: "Puissant", to, paymentValue: Number(value) };
+              return {
+                builder: "Puissant",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
               break;
 
             case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
               console.log(
                 `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
-              return { builder: "Blocksmith", to, paymentValue: Number(value) };
+              return {
+                builder: "Blocksmith",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
               break;
 
             case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
               console.log(
                 `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
-              return { builder: "Blocksmith", to, paymentValue: Number(value) };
+              return {
+                builder: "Blocksmith",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
               break;
 
             case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
               console.log(
                 `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
-              return { builder: "BlockRazor", to, paymentValue: Number(value) };
+              return {
+                builder: "BlockRazor",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
               break;
 
             case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
               console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
               return {
                 builder: "Bloxroute",
-                to,
+                toBuilder: to,
                 paymentValue: Number(value),
               };
               break;
@@ -3233,7 +3250,7 @@ async function getInternalTransactions(txHash) {
       }
     }
 
-    return { builder: "", to: "", paymentValue: 0 };
+    return { builder: "", toBuilder: "", paymentValue: 0 };
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
   }
@@ -3250,10 +3267,14 @@ async function processBlockTransactions(blockNumber) {
   let sum = 0;
 
   for (let i = 0; i < transactions.length; i++) {
-    let revenue_usd_bis = 0;
+    let revenueUsdBis = 0;
     const txHash = transactions[i];
 
     const txDetails = await provider.getTransaction(txHash);
+    console.log(txDetails);
+    let gasLimit = txDetails.gasLimit;
+    let gasPrice = txDetails.gasPrice;
+
     const toAddress = txDetails?.to; // error pop out
 
     const fromAddress = txDetails?.from;
@@ -3267,7 +3288,11 @@ async function processBlockTransactions(blockNumber) {
       amountsArray,
       isValidPath,
       venueAddresses,
+      gasUsed,
     } = await containsArbitrage(txHash);
+
+    let txnFees = Number(ethers.utils.formatEther(gasUsed.mul(gasPrice)));
+    let usdTxnFees = txnFees * priceMap["BNB-USDT"];
 
     if (!hasSwapEvent) continue;
 
@@ -3302,9 +3327,13 @@ async function processBlockTransactions(blockNumber) {
       fromBalanceDifference ||
       fromBalanceDifference === 0
     ) {
-      let { builder, to, paymentValue } = await getInternalTransactions(txHash);
+      let { builder, toBuilder, paymentValue } = await getInternalTransactions(
+        txHash
+      );
 
-      totalArbitrageCount++;
+      let usdPaymentValue = paymentValue * priceMap["BNB-USDT"];
+
+      let nonce = txDetails.nonce;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
       let amountInRate = tokenPath[0].split("=>")[0].includes("USD")
@@ -3341,15 +3370,23 @@ async function processBlockTransactions(blockNumber) {
         amount_in_usd_solo != 0
       ) {
         if (amount_out_usd_solo == amount_in_usd_solo) {
-          revenue_usd_bis = toBalanceDifference;
+          revenueUsdBis = toBalanceDifference;
         } else {
-          revenue_usd_bis = amount_out_usd_solo - amount_in_usd_solo;
+          revenueUsdBis = amount_out_usd_solo - amount_in_usd_solo;
         }
       }
 
       let botBalance =
         toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
           ? Number(await getOurBotUsdBalance(priceMap))
+          : 0;
+
+      let revenueUsd =
+        dexPath.length == tokenPath.length ? Number(toBalanceDifference) : 0;
+
+      let profitUsd =
+        dexPath.length == tokenPath.length
+          ? revenueUsd - txnFees - usdPaymentValue
           : 0;
 
       const logData = {
@@ -3364,7 +3401,12 @@ async function processBlockTransactions(blockNumber) {
           is_path_valid: dexPath.length == tokenPath.length && isValidPath,
           block_number: blockNumber,
           position: i,
-          nonce: await provider.getTransactionCount(fromAddress),
+          nonce,
+          gas_limit: gasLimit,
+          gas_price: gasPrice,
+          gas_used: gasUsed,
+          txn_fees: txnFees,
+          usd_txn_fees: usdTxnFees,
           token_path: tokenPath,
           venue_path: dexPath,
           new_dex: newDexes,
@@ -3386,19 +3428,16 @@ async function processBlockTransactions(blockNumber) {
             amountOutRate,
           amount_in: amountsArray?.[0],
           amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-          revenue_usd:
-            dexPath.length == tokenPath.length
-              ? Number(toBalanceDifference)
-              : 0,
-          revenue_usd_bis: revenue_usd_bis,
+          revenue_usd: revenueUsd,
+          revenue_usd_bis: revenueUsdBis,
         },
         ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
         ...(paymentValue > 0
           ? {
               builder,
-              to,
+              toBuilder,
               paymentValue,
-              usdPaymentValue: paymentValue * priceMap["BNB-USDT"],
+              usdPaymentValue,
             }
           : {}),
       };
