@@ -1,4 +1,4 @@
-const { ethers, uuidV4 } = require("ethers");
+const { ethers } = require("ethers");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
@@ -87,12 +87,14 @@ const addFactory = async (key, value) => {
     if (isContractVerified.length > 0 && isContractVerified[0].verified) {
       const contractDatas = await fetchContractCode(value);
 
-      console.log("contract data", contractDatas);
       const multipliers = extractMultipliers(contractDatas.sourceCode);
-      console.log("multplier", multipliers);
 
       if (multipliers.success) {
-        console.log("FEEEEESSSSS ---------", multipliers.fee);
+        key = contractDatas.contractName;
+        if (Object.keys(dexFactories).includes(key)) {
+          key = `${contractDatas.contractName}_${dexFactories.length}`;
+        }
+
         const logNewContract = {
           ...{
             timestamp: getTimestamp(),
@@ -102,6 +104,7 @@ const addFactory = async (key, value) => {
           },
           ...contractDatas,
           fees: multipliers.fee,
+          nameInDexFactory: key,
         };
 
         writeToLogFile(logNewContract);
@@ -2462,15 +2465,12 @@ async function fetchContractCode(contractAddress) {
 
     const { data } = response;
 
-    console.log("test", data.result[0].SourceCode.replace(/\r\n/g, " "));
-
     return {
       sourceCode: data.result[0].SourceCode.replace(/\r\n/g, " "),
       contractName: data.result[0].ContractName,
       abi: JSON.stringify(JSON.parse(data.result[0].ABI), 2, null),
     };
   } catch (error) {
-    console.log("error merde", error);
     return {
       sourceCode: "",
       contractName: "",
