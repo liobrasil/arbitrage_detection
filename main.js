@@ -3183,7 +3183,7 @@ async function getInternalTransactions(txHash) {
       },
     ]);
 
-    for(const log of trace.calls) {
+    for (const log of trace.calls) {
       if (log.type === "CALL" && log?.value) {
         const to = log.to;
         const value = ethers.formatEther(BigInt(log.value)); // Extract value
@@ -3231,7 +3231,7 @@ async function getInternalTransactions(txHash) {
           }
         }
       }
-    });
+    }
 
     return { builder: "", to: "", paymentValue: 0 };
   } catch (error) {
