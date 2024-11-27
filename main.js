@@ -3271,12 +3271,9 @@ async function processBlockTransactions(blockNumber) {
     const txHash = transactions[i];
 
     const txDetails = await provider.getTransaction(txHash);
-    console.log(txDetails);
-    let gasLimit = txDetails.gasLimit;
-    let gasPrice = txDetails.gasPrice;
-
+    const gasLimit = txDetails.gasLimit;
+    const gasPrice = txDetails.gasPrice;
     const toAddress = txDetails?.to; // error pop out
-
     const fromAddress = txDetails?.from;
 
     const {
@@ -3291,7 +3288,7 @@ async function processBlockTransactions(blockNumber) {
       gasUsed,
     } = await containsArbitrage(txHash);
 
-    let txnFees = Number(ethers.utils.formatEther(gasUsed.mul(gasPrice)));
+    let txnFees = Number(ethers.formatEther(gasUsed.mul(gasPrice)));
     let usdTxnFees = txnFees * priceMap["BNB-USDT"];
 
     if (!hasSwapEvent) continue;
