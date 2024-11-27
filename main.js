@@ -92,7 +92,9 @@ const addFactory = async (key, value) => {
       if (multipliers.success) {
         key = contractDatas.contractName;
         if (Object.keys(dexFactories).includes(key)) {
-          key = `${contractDatas.contractName}_${dexFactories.length}`;
+          key = `${contractDatas.contractName}_${
+            Object.keys(dexFactories).length
+          }`;
         }
 
         const logNewContract = {
