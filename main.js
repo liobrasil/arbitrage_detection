@@ -3176,8 +3176,14 @@ function computeUsdDifference(balanceChanges) {
 async function getInternalTransactions(txHash) {
   try {
     // Call debug_traceTransaction
-    const trace = await provider.send("debug_traceTransaction", [txHash]);
+    const trace = await provider.send("debug_traceTransaction", [
+      txHash,
+      {
+        tracer: "callTracer",
+      },
+    ]);
 
+    console.log("Internal transactions for:", trace.structLogs.length);
     trace.structLogs.forEach((log) => {
       if (log.op === "CALL" && log.stack.length > 1) {
         const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
@@ -3190,28 +3196,33 @@ async function getInternalTransactions(txHash) {
           switch (to.toLowerCase()) {
             case BUILDER_PUISSANT_ADDRESS.toLowerCase():
               console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
+              return { builder: "Puissant", to, value };
               break;
 
             case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
               console.log(
                 `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
+              return { builder: "Blocksmith", to, value };
               break;
 
             case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
               console.log(
                 `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
+              return { builder: "Blocksmith", to, value };
               break;
 
             case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
               console.log(
                 `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`
               );
+              return { builder: "BlockRazor", to, value };
               break;
 
             case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
               console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
+              return { builder: "Bloxroute", to, value };
               break;
 
             default:
@@ -3220,8 +3231,6 @@ async function getInternalTransactions(txHash) {
         }
       }
     });
-
-    return false;
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
   }
@@ -3290,6 +3299,8 @@ async function processBlockTransactions(blockNumber) {
       fromBalanceDifference ||
       fromBalanceDifference === 0
     ) {
+      let { builder, to, value } = await getInternalTransactions(txHash);
+
       totalArbitrageCount++;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
@@ -3350,6 +3361,7 @@ async function processBlockTransactions(blockNumber) {
           is_path_valid: dexPath.length == tokenPath.length && isValidPath,
           block_number: blockNumber,
           position: i,
+          nonce: await provider.getTransactionCount(fromAddress),
           token_path: tokenPath,
           venue_path: dexPath,
           new_dex: newDexes,
@@ -3378,6 +3390,7 @@ async function processBlockTransactions(blockNumber) {
           profit_usd_bis: profit_usd_bis,
         },
         ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
+        ...(builder ? { builder, to, value } : {}),
       };
 
       writeToLogFile(logData);
