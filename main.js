@@ -74,6 +74,18 @@ const addFactory = async (key, value) => {
     // Parse the JSON data
     let jsonData = JSON.parse(data);
 
+    for (const keyObject in jsonData) {
+      if (
+        jsonData[keyObject].toLowerCase() === value.toLowerCase() &&
+        keyObject.includes("NewFactory")
+      ) {
+        delete jsonData[keyObject];
+        console.log(
+          `Deleted keyObject "${keyObject}" with value "${value}" as it matched "NewFactory".`
+        );
+      }
+    }
+
     // Check if the value (address) already exists
     const addressExists = Object.values(jsonData).includes(value);
 
