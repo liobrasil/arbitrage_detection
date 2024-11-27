@@ -105,7 +105,9 @@ const addFactory = async (key, value) => {
             _appid: "adfl_bsc_mev_analyse",
           },
           ...contractDatas,
+          address: value,
           fees: multipliers.fee,
+
           nameInDexFactory: key,
         };
 
