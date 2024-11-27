@@ -3302,8 +3302,7 @@ async function processBlockTransactions(blockNumber) {
       fromBalanceDifference ||
       fromBalanceDifference === 0
     ) {
-      let { builder, to, paymentValue, usdPaymentValue } =
-        await getInternalTransactions(txHash);
+      let { builder, to, paymentValue } = await getInternalTransactions(txHash);
 
       totalArbitrageCount++;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
@@ -3394,7 +3393,7 @@ async function processBlockTransactions(blockNumber) {
           profit_usd_bis: profit_usd_bis,
         },
         ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
-        ...(value > 0
+        ...(paymentValue > 0
           ? {
               builder,
               to,
