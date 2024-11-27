@@ -3183,7 +3183,7 @@ async function getInternalTransactions(txHash) {
       },
     ]);
 
-    trace.calls.forEach((log) => {
+    for(const log of trace.calls) {
       if (log.type === "CALL" && log?.value) {
         const to = log.to;
         const value = ethers.formatEther(BigInt(log.value)); // Extract value
