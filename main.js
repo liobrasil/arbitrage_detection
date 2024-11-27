@@ -3184,6 +3184,7 @@ async function getInternalTransactions(txHash) {
     ]);
 
     trace.calls.forEach((log) => {
+      console.log("VALUESSSS", log?.value);
       const value = ethers.formatEther(BigInt(log.value)); // Extract value
 
       if (log.type === "CALL" && Number(value) !== 0) {
