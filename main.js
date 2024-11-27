@@ -3290,7 +3290,8 @@ async function processBlockTransactions(blockNumber) {
 
     let txnFees;
     if (gasUsed) {
-      txnFees = Number(ethers.formatEther(gasUsed * gasPrice));
+      txnFees =
+        Number(gasUsed.toString()) * Number(ethers.formatEther(gasPrice));
     }
     let txnFeesUsd = txnFees * priceMap["BNB-USDT"];
 
@@ -3407,9 +3408,9 @@ async function processBlockTransactions(blockNumber) {
           block_number: blockNumber,
           position: i,
           nonce,
-          gas_limit: Number(ethers.toString(gasLimit)),
+          gas_limit: Number(gasLimit.toString()),
           gas_price: ethers.formatEther(gasPrice),
-          gas_used: ethers.formatEther(gasUsed),
+          gas_used: Number(gasUsed.toString()),
           txn_fees: txnFees,
           txn_fees_usd: txnFeesUsd,
           token_path: tokenPath,
@@ -3443,8 +3444,8 @@ async function processBlockTransactions(blockNumber) {
           ? {
               builder,
               toBuilder,
-              paymentValue,
-              usdPaymentValue,
+              payment_value: paymentValue,
+              payment_value_usd: usdPaymentValue,
             }
           : {}),
       };
