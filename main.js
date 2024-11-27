@@ -3288,7 +3288,10 @@ async function processBlockTransactions(blockNumber) {
       gasUsed,
     } = await containsArbitrage(txHash);
 
-    let txnFees = Number(ethers.formatEther(gasUsed * gasPrice));
+    let txnFees;
+    if (gasUsed) {
+      txnFees = Number(ethers.formatEther(gasUsed * gasPrice));
+    }
     let txnFeesUsd = txnFees * priceMap["BNB-USDT"];
 
     if (!hasSwapEvent) continue;
