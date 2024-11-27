@@ -3184,54 +3184,44 @@ async function getInternalTransactions(txHash) {
     ]);
 
     trace.calls.forEach((log) => {
-      console.log("------------------", JSON.stringify(log));
-      if (log.type === "CALL" && log.stack.length > 1) {
-        const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
-        const value = ethers.formatEther(
-          BigInt(log.stack[log.stack.length - 3])
-        ); // Extract value
+      const value = ethers.formatEther(BigInt(log.value)); // Extract value
 
-        // Switch-based logic
-        if (Number(value) !== 0) {
-          switch (to.toLowerCase()) {
-            case BUILDER_PUISSANT_ADDRESS.toLowerCase():
-              console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
-              return { builder: "Puissant", to, paymentValue: Number(value) };
-              break;
+      if (log.type === "CALL" && Number(value) !== 0) {
+        const to = log.to;
+        switch (to.toLowerCase()) {
+          case BUILDER_PUISSANT_ADDRESS.toLowerCase():
+            console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
+            return { builder: "Puissant", to, paymentValue: Number(value) };
+            break;
 
-            case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
-              console.log(
-                `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
-              );
-              return { builder: "Blocksmith", to, paymentValue: Number(value) };
-              break;
+          case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
+            console.log(
+              `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
+            );
+            return { builder: "Blocksmith", to, paymentValue: Number(value) };
+            break;
 
-            case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
-              console.log(
-                `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`
-              );
-              return { builder: "Blocksmith", to, paymentValue: Number(value) };
-              break;
+          case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
+            console.log(`BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`);
+            return { builder: "Blocksmith", to, paymentValue: Number(value) };
+            break;
 
-            case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
-              console.log(
-                `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`
-              );
-              return { builder: "BlockRazor", to, paymentValue: Number(value) };
-              break;
+          case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
+            console.log(`BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`);
+            return { builder: "BlockRazor", to, paymentValue: Number(value) };
+            break;
 
-            case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
-              console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
-              return {
-                builder: "Bloxroute",
-                to,
-                paymentValue: Number(value),
-              };
-              break;
+          case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
+            console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
+            return {
+              builder: "Bloxroute",
+              to,
+              paymentValue: Number(value),
+            };
+            break;
 
-            default:
-              break;
-          }
+          default:
+            break;
         }
       }
     });
