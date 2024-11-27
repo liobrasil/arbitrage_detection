@@ -3288,8 +3288,8 @@ async function processBlockTransactions(blockNumber) {
       gasUsed,
     } = await containsArbitrage(txHash);
 
-    let txnFees = Number(ethers.formatEther(gasUsed.mul(gasPrice)));
-    let usdTxnFees = txnFees * priceMap["BNB-USDT"];
+    let txnFees = Number(ethers.formatEther(gasUsed * gasPrice));
+    let txnFeesUsd = txnFees * priceMap["BNB-USDT"];
 
     if (!hasSwapEvent) continue;
 
@@ -3383,7 +3383,12 @@ async function processBlockTransactions(blockNumber) {
 
       let profitUsd =
         dexPath.length == tokenPath.length
-          ? revenueUsd - txnFees - usdPaymentValue
+          ? revenueUsd - txnFeesUsd - usdPaymentValue
+          : 0;
+
+      let profitUsdBis =
+        dexPath.length == tokenPath.length
+          ? revenueUsdBis - txnFeesUsd - usdPaymentValue
           : 0;
 
       const logData = {
@@ -3403,7 +3408,7 @@ async function processBlockTransactions(blockNumber) {
           gas_price: gasPrice,
           gas_used: gasUsed,
           txn_fees: txnFees,
-          usd_txn_fees: usdTxnFees,
+          txn_fees_usd: txnFeesUsd,
           token_path: tokenPath,
           venue_path: dexPath,
           new_dex: newDexes,
@@ -3426,7 +3431,9 @@ async function processBlockTransactions(blockNumber) {
           amount_in: amountsArray?.[0],
           amount_out: amountsArray?.[amountsArray.length - 1] || 0,
           revenue_usd: revenueUsd,
+          profit_usd: profitUsd,
           revenue_usd_bis: revenueUsdBis,
+          profit_usd_bis: profitUsdBis,
         },
         ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
         ...(paymentValue > 0
