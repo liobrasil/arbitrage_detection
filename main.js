@@ -3183,9 +3183,9 @@ async function getInternalTransactions(txHash) {
       },
     ]);
 
-    console.log("Internal transactions for:", trace);
-    trace.forEach((log) => {
-      if (log.op === "CALL" && log.stack.length > 1) {
+    trace.calls.forEach((log) => {
+      console.log(JSON.stringify(log));
+      if (log.type === "CALL" && log.stack.length > 1) {
         const to = "0x" + log.stack[log.stack.length - 2].slice(-40); // Extract 'to' address
         const value = ethers.formatEther(
           BigInt(log.stack[log.stack.length - 3])
