@@ -3349,6 +3349,7 @@ async function processBlockTransactions(blockNumber) {
           txn_hash: txHash,
           is_path_valid: dexPath.length == tokenPath.length && isValidPath,
           block_number: blockNumber,
+          position: i,
           token_path: tokenPath,
           venue_path: dexPath,
           new_dex: newDexes,
