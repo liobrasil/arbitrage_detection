@@ -3250,7 +3250,7 @@ async function processBlockTransactions(blockNumber) {
   let sum = 0;
 
   for (let i = 0; i < transactions.length; i++) {
-    let profit_usd_bis = 0;
+    let revenue_usd_bis = 0;
     const txHash = transactions[i];
 
     const txDetails = await provider.getTransaction(txHash);
@@ -3303,6 +3303,7 @@ async function processBlockTransactions(blockNumber) {
       fromBalanceDifference === 0
     ) {
       let { builder, to, paymentValue } = await getInternalTransactions(txHash);
+      console.log("payment Value", paymentValue);
 
       totalArbitrageCount++;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
@@ -3341,9 +3342,9 @@ async function processBlockTransactions(blockNumber) {
         amount_in_usd_solo != 0
       ) {
         if (amount_out_usd_solo == amount_in_usd_solo) {
-          profit_usd_bis = toBalanceDifference;
+          revenue_usd_bis = toBalanceDifference;
         } else {
-          profit_usd_bis = amount_out_usd_solo - amount_in_usd_solo;
+          revenue_usd_bis = amount_out_usd_solo - amount_in_usd_solo;
         }
       }
 
@@ -3386,11 +3387,11 @@ async function processBlockTransactions(blockNumber) {
             amountOutRate,
           amount_in: amountsArray?.[0],
           amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-          profit_usd:
+          revenue_usd:
             dexPath.length == tokenPath.length
               ? Number(toBalanceDifference)
               : 0,
-          profit_usd_bis: profit_usd_bis,
+          revenue_usd_bis: revenue_usd_bis,
         },
         ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
         ...(paymentValue > 0
