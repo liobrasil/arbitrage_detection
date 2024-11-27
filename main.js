@@ -3303,7 +3303,6 @@ async function processBlockTransactions(blockNumber) {
       fromBalanceDifference === 0
     ) {
       let { builder, to, paymentValue } = await getInternalTransactions(txHash);
-      console.log("payment Value", paymentValue);
 
       totalArbitrageCount++;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
