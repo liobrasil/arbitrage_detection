@@ -3342,6 +3342,8 @@ async function processBlockTransactions(blockNumber) {
         txHash
       );
 
+      totalArbitrageCount++;
+
       let usdPaymentValue = paymentValue * priceMap["BNB-USDT"];
 
       let nonce = txDetails.nonce;
