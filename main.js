@@ -3200,7 +3200,6 @@ async function getInternalTransactions(txHash) {
                 toBuilder: to,
                 paymentValue: Number(value),
               };
-              break;
 
             case BUILDER_NODEREAL_ADDRESS.toLowerCase():
               console.log(`NODEREAL PAYMENT: To: ${to}, Amount: ${value} BNB`);
@@ -3209,7 +3208,6 @@ async function getInternalTransactions(txHash) {
                 toBuilder: to,
                 paymentValue: Number(value),
               };
-              break;
 
             case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
               console.log(
@@ -3220,7 +3218,6 @@ async function getInternalTransactions(txHash) {
                 toBuilder: to,
                 paymentValue: Number(value),
               };
-              break;
 
             case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
               console.log(
@@ -3231,7 +3228,6 @@ async function getInternalTransactions(txHash) {
                 toBuilder: to,
                 paymentValue: Number(value),
               };
-              break;
 
             case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
               console.log(
@@ -3242,7 +3238,6 @@ async function getInternalTransactions(txHash) {
                 toBuilder: to,
                 paymentValue: Number(value),
               };
-              break;
 
             case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
               console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
@@ -3251,7 +3246,6 @@ async function getInternalTransactions(txHash) {
                 toBuilder: to,
                 paymentValue: Number(value),
               };
-              break;
 
             default:
               break;
@@ -3278,81 +3272,64 @@ async function getBuilderPaymentTransactionsOnTransfer(txHash) {
       },
     ]);
 
-    console.log("the trace  for:", trace);
+    const to = trace.to;
+    const value = ethers.formatEther(BigInt(trace.value)); // Extract value
 
-    return;
-    for (const log of trace.calls) {
-      if (log.type === "CALL" && log?.value) {
-        const to = log.to;
-        const value = ethers.formatEther(BigInt(log.value)); // Extract value
+    // Switch-based logic
+    if (Number(value) !== 0) {
+      switch (to.toLowerCase()) {
+        case BUILDER_PUISSANT_ADDRESS.toLowerCase():
+          console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
+          return {
+            builderTransfer: "Puissant",
+            toBuilderTransfer: to,
+            paymentValueTransfer: Number(value),
+          };
 
-        // Switch-based logic
-        if (Number(value) !== 0) {
-          switch (to.toLowerCase()) {
-            case BUILDER_PUISSANT_ADDRESS.toLowerCase():
-              console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
-              return {
-                builder: "Puissant",
-                toBuilder: to,
-                paymentValue: Number(value),
-              };
-              break;
+        case BUILDER_NODEREAL_ADDRESS.toLowerCase():
+          console.log(`NODEREAL PAYMENT: To: ${to}, Amount: ${value} BNB`);
+          return {
+            builderTransfer: "Nodereal",
+            toBuilderTransfer: to,
+            paymentValueTransfer: Number(value),
+          };
 
-            case BUILDER_NODEREAL_ADDRESS.toLowerCase():
-              console.log(`NODEREAL PAYMENT: To: ${to}, Amount: ${value} BNB`);
-              return {
-                builder: "Nodereal",
-                toBuilder: to,
-                paymentValue: Number(value),
-              };
-              break;
+        case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
+          console.log(
+            `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
+          );
+          return {
+            builderTransfer: "Blocksmith",
+            toBuilderTransfer: to,
+            paymentValueTransfer: Number(value),
+          };
 
-            case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
-              console.log(
-                `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
-              );
-              return {
-                builder: "Blocksmith",
-                toBuilder: to,
-                paymentValue: Number(value),
-              };
-              break;
+        case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
+          console.log(`BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`);
+          return {
+            builderTransfer: "Blocksmith",
+            toBuilderTransfer: to,
+            paymentValueTransfer: Number(value),
+          };
 
-            case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
-              console.log(
-                `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`
-              );
-              return {
-                builder: "Blocksmith",
-                toBuilder: to,
-                paymentValue: Number(value),
-              };
-              break;
+        case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
+          console.log(`BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`);
+          return {
+            builderTransfer: "BlockRazor",
+            toBuilderTransfer: to,
+            paymentValueTransfer: Number(value),
+          };
 
-            case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
-              console.log(
-                `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`
-              );
-              return {
-                builder: "BlockRazor",
-                toBuilder: to,
-                paymentValue: Number(value),
-              };
-              break;
+        case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
+          console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
+          return {
+            builderTransfer: "Bloxroute",
+            toBuilderTransfer: to,
+            paymentValueTransfer: Number(value),
+          };
 
-            case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
-              console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
-              return {
-                builder: "Bloxroute",
-                toBuilder: to,
-                paymentValue: Number(value),
-              };
-              break;
-
-            default:
-              break;
-          }
-        }
+        default:
+          break;
       }
     }
 
@@ -3428,7 +3405,36 @@ async function processBlockTransactions(blockNumber) {
       sum += fromBalanceDifference;
     }
 
-    await getBuilderPaymentTransactionsOnTransfer(txHash);
+    let { builderTransfer, toBuilderTransfer, paymentValueTransfer } =
+      await getBuilderPaymentTransactionsOnTransfer(txHash);
+
+    if (paymentValueTransfer > 0) {
+      const logDataPaymentTransfer = {
+        ...{
+          timestamp: getTimestamp(),
+          level: "INFO",
+          _type: "MevSinglePayment",
+          _appid: "adfl_bsc_mev_analyse",
+          from: fromAddress,
+          to: toAddress,
+          txn_hash: txHash,
+          block_number: blockNumber,
+          position: i,
+          nonce,
+          gas_limit: Number(gasLimit.toString()),
+          gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
+          gas_used: Number(gasUsed.toString()),
+          txn_fees: Number(txnFees),
+          txn_fees_usd: txnFeesUsd,
+          builder: builderTransfer,
+          toBuilder: toBuilderTransfer,
+          payment_value: paymentValueTransfer,
+          payment_value_usd: paymentValueTransfer * priceMap["BNB-USDT"],
+        },
+      };
+
+      writeToLogFile(logDataPaymentTransfer);
+    }
 
     if (
       toAddressBalanceChange ||
