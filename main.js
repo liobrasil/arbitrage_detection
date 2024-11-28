@@ -3414,27 +3414,25 @@ async function processBlockTransactions(blockNumber) {
 
     if (paymentValueTransfer > 0) {
       const logDataPaymentTransfer = {
-        ...{
-          timestamp: getTimestamp(),
-          level: "INFO",
-          _type: "MevSinglePayment",
-          _appid: "adfl_bsc_mev_analyse",
-          from: fromAddress,
-          to: toAddress,
-          txn_hash: txHash,
-          block_number: blockNumber,
-          position: i,
-          nonce,
-          gas_limit: Number(gasLimit.toString()),
-          gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
-          gas_used: Number(gasUsed.toString()),
-          txn_fees: Number(txnFees),
-          txn_fees_usd: txnFeesUsd,
-          builder: builderTransfer,
-          toBuilder: toBuilderTransfer,
-          payment_value: paymentValueTransfer,
-          payment_value_usd: paymentValueTransfer * priceMap["BNB-USDT"],
-        },
+        timestamp: getTimestamp(),
+        level: "INFO",
+        _type: "MevSinglePayment",
+        _appid: "adfl_bsc_mev_analyse",
+        from: fromAddress,
+        to: toAddress,
+        txn_hash: txHash,
+        block_number: blockNumber,
+        position: i,
+        nonce,
+        gas_limit: Number(gasLimit.toString()),
+        gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
+        gas_used: Number(gasUsed.toString()),
+        txn_fees: Number(txnFees),
+        txn_fees_usd: txnFeesUsd,
+        builder: builderTransfer,
+        toBuilder: toBuilderTransfer,
+        payment_value: paymentValueTransfer,
+        payment_value_usd: paymentValueTransfer * priceMap["BNB-USDT"],
       };
 
       writeToLogFile(logDataPaymentTransfer);
