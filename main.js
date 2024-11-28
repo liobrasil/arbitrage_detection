@@ -3421,7 +3421,7 @@ async function processBlockTransactions(blockNumber) {
           position: i,
           nonce,
           gas_limit: Number(gasLimit.toString()),
-          gas_price: ethers.formatEther(gasPrice),
+          gas_price: ethers.formatUnits(gasPrice, 9),
           gas_used: Number(gasUsed.toString()),
           txn_fees: txnFees,
           txn_fees_usd: txnFeesUsd,
