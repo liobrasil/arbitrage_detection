@@ -3272,6 +3272,8 @@ async function getBuilderPaymentTransactionsOnTransfer(txHash) {
       },
     ]);
 
+    console.log("trace", trace);
+
     const to = trace.to;
     const value = ethers.formatEther(BigInt(trace.value)); // Extract value
 
@@ -3412,6 +3414,7 @@ async function processBlockTransactions(blockNumber) {
     let { builderTransfer, toBuilderTransfer, paymentValueTransfer } =
       await getBuilderPaymentTransactionsOnTransfer(txHash);
 
+    console.log("paymentValueTransfer", paymentValueTransfer);
     if (paymentValueTransfer > 0) {
       const logDataPaymentTransfer = {
         timestamp: getTimestamp(),
