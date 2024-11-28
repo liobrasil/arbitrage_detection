@@ -3279,6 +3279,7 @@ async function getBuilderPaymentTransactionsOnTransfer(txHash) {
 
     // Switch-based logic
     if (Number(value) !== 0) {
+      console.log("BINKS");
       switch (to.toLowerCase()) {
         case BUILDER_PUISSANT_ADDRESS.toLowerCase():
           console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
