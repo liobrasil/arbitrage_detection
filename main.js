@@ -3383,7 +3383,8 @@ async function processBlockTransactions(blockNumber) {
         amount_in_usd_solo != 0
       ) {
         if (amount_out_usd_solo == amount_in_usd_solo) {
-          revenueUsdBis = toBalanceDifference;
+          revenueUsdBis =
+            typeof toBalanceDifference == "number" ? toBalanceDifference : 0;
         } else {
           revenueUsdBis = amount_out_usd_solo - amount_in_usd_solo;
         }
