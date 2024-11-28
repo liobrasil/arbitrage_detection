@@ -519,7 +519,7 @@ async function getOurBotUsdBalance(priceMap) {
 
   // Calculate total portfolio value
   const totalValue = balances.reduce((sum, token) => sum + token.valueUSD, 0);
-  return totalValue;
+  return { totalValue, balances };
 }
 
 // Function to find the DEX name by address
@@ -3266,6 +3266,104 @@ async function getInternalTransactions(txHash) {
   }
 }
 
+// Function to get builder payment transactions
+async function getBuilderPaymentTransactionsOnTransfer(txHash) {
+  try {
+    // Call debug_traceTransaction
+    const trace = await provider.send("debug_traceTransaction", [
+      txHash,
+      {
+        tracer: "callTracer",
+      },
+      {
+        tracerConfig: { onlyTopCall: true },
+      },
+    ]);
+
+    console.log("the trace  for:", trace);
+
+    return;
+    for (const log of trace.calls) {
+      if (log.type === "CALL" && log?.value) {
+        const to = log.to;
+        const value = ethers.formatEther(BigInt(log.value)); // Extract value
+
+        // Switch-based logic
+        if (Number(value) !== 0) {
+          switch (to.toLowerCase()) {
+            case BUILDER_PUISSANT_ADDRESS.toLowerCase():
+              console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
+              return {
+                builder: "Puissant",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
+              break;
+
+            case BUILDER_NODEREAL_ADDRESS.toLowerCase():
+              console.log(`NODEREAL PAYMENT: To: ${to}, Amount: ${value} BNB`);
+              return {
+                builder: "Nodereal",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
+              break;
+
+            case BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER.toLowerCase():
+              console.log(
+                `BLOCKSMITH FEE TIER PAYMENT: To: ${to}, Amount: ${value} BNB`
+              );
+              return {
+                builder: "Blocksmith",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
+              break;
+
+            case BUILDER_BLOCKSMITH_ADDRESS.toLowerCase():
+              console.log(
+                `BLOCKSMITH PAYMENT: To: ${to}, Amount: ${value} BNB`
+              );
+              return {
+                builder: "Blocksmith",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
+              break;
+
+            case BUILDER_BLOCKRAZOR_ADDRESS.toLowerCase():
+              console.log(
+                `BLOCKRAZOR PAYMENT: To: ${to}, Amount: ${value} BNB`
+              );
+              return {
+                builder: "BlockRazor",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
+              break;
+
+            case BUILDER_BLOXROUTE_ADDRESS.toLowerCase():
+              console.log(`BLOXROUTE PAYMENT: To: ${to}, Amount: ${value} BNB`);
+              return {
+                builder: "Bloxroute",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
+              break;
+
+            default:
+              break;
+          }
+        }
+      }
+    }
+
+    return { builder: "", toBuilder: "", paymentValue: 0 };
+  } catch (error) {
+    console.error("Error fetching internal transactions:", error.message);
+  }
+}
+
 // Updated main function
 async function processBlockTransactions(blockNumber) {
   let totalArbitrageCount = 0;
@@ -3332,6 +3430,8 @@ async function processBlockTransactions(blockNumber) {
       sum += fromBalanceDifference;
     }
 
+    await getBuilderPaymentTransactionsOnTransfer(txHash);
+
     if (
       toAddressBalanceChange ||
       toBalanceDifference === 0 ||
@@ -3390,9 +3490,11 @@ async function processBlockTransactions(blockNumber) {
         }
       }
 
+      const { totalValue, balances } = await getOurBotUsdBalance(priceMap);
+
       let botBalance =
         toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
-          ? Number(await getOurBotUsdBalance(priceMap))
+          ? Number(totalValue)
           : 0;
 
       let revenueUsd =
@@ -3453,7 +3555,7 @@ async function processBlockTransactions(blockNumber) {
           profit_usd_bis: profitUsdBis,
           percentage_revenue_bis: (txnFeesUsd / revenueUsdBis) * 100,
         },
-        ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
+        ...(botBalance > 0 ? { bot_balance: botBalance, balances } : {}),
         ...(paymentValue > 0
           ? {
               builder,
