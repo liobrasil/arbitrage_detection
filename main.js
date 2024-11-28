@@ -3450,6 +3450,7 @@ async function processBlockTransactions(blockNumber) {
           profit_usd: profitUsd,
           revenue_usd_bis: revenueUsdBis,
           profit_usd_bis: profitUsdBis,
+          percentage_revenue_bis: (txnFeesUsd / revenueUsdBis) * 100,
         },
         ...(botBalance > 0 ? { bot_balance: botBalance } : {}),
         ...(paymentValue > 0
@@ -3458,7 +3459,7 @@ async function processBlockTransactions(blockNumber) {
               toBuilder,
               payment_value: paymentValue,
               payment_value_usd: usdPaymentValue,
-              percentage:
+              percentage_payment_bis:
                 (usdPaymentValue / (revenueUsdBis - txnFeesUsd)) * 100,
             }
           : {}),
