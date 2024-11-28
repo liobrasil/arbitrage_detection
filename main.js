@@ -3274,8 +3274,6 @@ async function getBuilderPaymentTransactionsOnTransfer(txHash) {
       txHash,
       {
         tracer: "callTracer",
-      },
-      {
         tracerConfig: { onlyTopCall: true },
       },
     ]);
