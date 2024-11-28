@@ -152,6 +152,7 @@ const HUOBI_API_URL = "https://api.huobi.pro/market/tickers";
 const OKX_API_URL = "https://www.okx.com/api/v5/market/tickers?instType=SPOT";
 
 const BUILDER_PUISSANT_ADDRESS = "0x4848489f0b2BEdd788c696e2D79b6b69D7484848";
+const BUILDER_NODEREAL_ADDRESS = "0x79102db16781dddff63f301c9be557fd1dd48fa0";
 const BUILDER_BLOCKSMITH_ADDRESS_FEE_TIER =
   "0x6AF484EABbCF3cbdf603Df87D3Ace75De13C28f3";
 const BUILDER_BLOCKSMITH_ADDRESS = "0x0000000000007592b04bB3BB8985402cC37Ca224";
@@ -3196,6 +3197,15 @@ async function getInternalTransactions(txHash) {
               console.log(`PUISSANT PAYMENT: To: ${to}, Amount: ${value} BNB`);
               return {
                 builder: "Puissant",
+                toBuilder: to,
+                paymentValue: Number(value),
+              };
+              break;
+
+            case BUILDER_NODEREAL_ADDRESS.toLowerCase():
+              console.log(`NODEREAL PAYMENT: To: ${to}, Amount: ${value} BNB`);
+              return {
+                builder: "Nodereal",
                 toBuilder: to,
                 paymentValue: Number(value),
               };
