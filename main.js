@@ -3333,6 +3333,7 @@ async function processBlockTransactions(blockNumber) {
     const toAddress = txDetails?.to; // error pop out
     const fromAddress = txDetails?.from;
     const value = ethers.formatEther(BigInt(txDetails.value)); // Extract value
+    const nonce = txDetails.nonce;
 
     const {
       hasSwapEvent,
@@ -3425,7 +3426,6 @@ async function processBlockTransactions(blockNumber) {
 
       let usdPaymentValue = paymentValue * priceMap["BNB-USDT"];
 
-      let nonce = txDetails.nonce;
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
       let amountInRate = tokenPath[0].split("=>")[0].includes("USD")
