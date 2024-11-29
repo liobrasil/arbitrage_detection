@@ -3315,6 +3315,13 @@ async function getBuilderPaymentTransactionsOnTransfer(to, value) {
   }
 }
 
+function formatBalances(balances) {
+  return balances.reduce((acc, item) => {
+    acc[item.symbol] = Number(item.balance);
+    return acc;
+  }, {});
+}
+
 // Updated main function
 async function processBlockTransactions(blockNumber) {
   let totalArbitrageCount = 0;
@@ -3535,7 +3542,9 @@ async function processBlockTransactions(blockNumber) {
           profit_usd_bis: profitUsdBis,
           percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
         },
-        ...(botBalance > 0 ? { bot_balance: botBalance, balances } : {}),
+        ...(botBalance > 0
+          ? { bot_balance: botBalance, botBalances: formatBalances(balances) }
+          : {}),
         ...(paymentValue > 0
           ? {
               builder,
