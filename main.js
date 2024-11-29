@@ -3290,6 +3290,7 @@ async function getBuilderPaymentTransactionsOnTransfer(txHash) {
 
     // Switch-based logic
     if (Number(value) !== 0) {
+      if (trace.data === "0x") console.log("data : ", trace);
       const builders = [
         { name: "Puissant", addresses: BUILDER_PUISSANT_ADDRESSES },
         { name: "Jetbldr", addresses: BUILDER_JETBLDR_ADDRESSES },
