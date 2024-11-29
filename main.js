@@ -2561,6 +2561,7 @@ async function containsArbitrage(txHash) {
       amountsArray,
       newDexes,
       venueAddresses,
+      gasUsed: receipt?.gasUsed,
     };
 
   const logs = receipt.logs;
@@ -2987,6 +2988,7 @@ async function containsArbitrage(txHash) {
     amountsArray,
     newDexes,
     venueAddresses,
+    gasUsed: receipt.gasUsed,
   };
 }
 
@@ -3349,9 +3351,9 @@ async function processBlockTransactions(blockNumber) {
 
     let txnFees;
     if (gasUsed) {
-      txnFees = Number(gasUsed * ethers.formatEther(gasPrice));
+      txnFees = Number(gasUsed) * Number(ethers.formatEther(gasPrice));
     }
-    let txnFeesUsd = Number(txnFees * priceMap["BNB-USDT"]);
+    let txnFeesUsd = txnFees * priceMap["BNB-USDT"];
 
     let { builderTransfer, toBuilderTransfer, paymentValueTransfer } =
       await getBuilderPaymentTransactionsOnTransfer(toAddress, value);
