@@ -3266,9 +3266,9 @@ async function getInternalTransactions(txHash) {
     }
 
     return {
-      builderTransfer: "",
-      toBuilderTransfer: "",
-      paymentValueTransfer: 0,
+      builder: "",
+      toBuilder: "",
+      paymentValue: 0,
     };
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
@@ -3529,10 +3529,10 @@ async function processBlockTransactions(blockNumber) {
             amountOutRate,
           amount_in: amountsArray?.[0],
           amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-          revenue_usd: revenueUsd ?? 0,
-          profit_usd: profitUsd ?? 0,
-          revenue_usd_bis: revenueUsdBis ?? 0,
-          profit_usd_bis: profitUsdBis ?? 0,
+          revenue_usd: revenueUsd,
+          profit_usd: profitUsd,
+          revenue_usd_bis: revenueUsdBis,
+          profit_usd_bis: profitUsdBis,
           percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
         },
         ...(botBalance > 0 ? { bot_balance: botBalance, balances } : {}),
