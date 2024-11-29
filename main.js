@@ -3274,23 +3274,10 @@ async function getInternalTransactions(txHash) {
 }
 
 // Function to get builder payment transactions
-async function getBuilderPaymentTransactionsOnTransfer(txHash) {
+async function getBuilderPaymentTransactionsOnTransfer(to, value) {
   try {
-    // Call debug_traceTransaction
-    const trace = await provider.send("debug_traceTransaction", [
-      txHash,
-      {
-        tracer: "callTracer",
-        tracerConfig: { onlyTopCall: true },
-      },
-    ]);
-
-    const to = trace.to;
-    const value = ethers.formatEther(BigInt(trace.value)); // Extract value
-
     // Switch-based logic
     if (Number(value) !== 0) {
-      if (trace.data === "0x") console.log("data : ", trace);
       const builders = [
         { name: "Puissant", addresses: BUILDER_PUISSANT_ADDRESSES },
         { name: "Jetbldr", addresses: BUILDER_JETBLDR_ADDRESSES },
@@ -3345,6 +3332,7 @@ async function processBlockTransactions(blockNumber) {
     const gasPrice = txDetails.gasPrice;
     const toAddress = txDetails?.to; // error pop out
     const fromAddress = txDetails?.from;
+    const value = ethers.formatEther(BigInt(txDetails.value)); // Extract value
 
     const {
       hasSwapEvent,
@@ -3393,7 +3381,7 @@ async function processBlockTransactions(blockNumber) {
     }
 
     let { builderTransfer, toBuilderTransfer, paymentValueTransfer } =
-      await getBuilderPaymentTransactionsOnTransfer(txHash);
+      await getBuilderPaymentTransactionsOnTransfer(toAddress, value);
 
     if (paymentValueTransfer > 0) {
       const logDataPaymentTransfer = {
