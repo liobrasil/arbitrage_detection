@@ -3373,7 +3373,7 @@ async function processBlockTransactions(blockNumber) {
         data: txDetails.data,
         gas_limit: Number(gasLimit.toString()),
         gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
-        gas_used: Number(gasUsed.toString()),
+        gas_used: Number(gasUsed?.toString()),
         txn_fees: Number(txnFees),
         txn_fees_usd: txnFeesUsd,
         builder: builderTransfer,
