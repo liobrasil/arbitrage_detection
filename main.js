@@ -3353,33 +3353,6 @@ async function processBlockTransactions(blockNumber) {
     }
     let txnFeesUsd = txnFees * priceMap["BNB-USDT"];
 
-    if (!hasSwapEvent) continue;
-
-    const balanceChanges = await getBalanceChanges(txHash, priceMap);
-
-    const toAddressBalanceChange = balanceChanges.find(
-      (change) => change.account.toLowerCase() === toAddress?.toLowerCase()
-    );
-
-    const toBalanceDifference = toAddressBalanceChange
-      ? computeUsdDifference(toAddressBalanceChange)
-      : 0;
-
-    const fromAddressBalanceChange = balanceChanges.find(
-      (change) => change.account.toLowerCase() === toAddress?.toLowerCase()
-    );
-
-    const fromBalanceDifference = fromAddressBalanceChange
-      ? computeUsdDifference(fromAddressBalanceChange)
-      : 0;
-
-    if (typeof toBalanceDifference === "number") {
-      sum += toBalanceDifference;
-    }
-    if (typeof fromBalanceDifference === "number") {
-      sum += fromBalanceDifference;
-    }
-
     let { builderTransfer, toBuilderTransfer, paymentValueTransfer } =
       await getBuilderPaymentTransactionsOnTransfer(toAddress, value);
 
@@ -3409,6 +3382,33 @@ async function processBlockTransactions(blockNumber) {
       };
 
       writeToLogFile(logDataPaymentTransfer);
+    }
+
+    if (!hasSwapEvent) continue;
+
+    const balanceChanges = await getBalanceChanges(txHash, priceMap);
+
+    const toAddressBalanceChange = balanceChanges.find(
+      (change) => change.account.toLowerCase() === toAddress?.toLowerCase()
+    );
+
+    const toBalanceDifference = toAddressBalanceChange
+      ? computeUsdDifference(toAddressBalanceChange)
+      : 0;
+
+    const fromAddressBalanceChange = balanceChanges.find(
+      (change) => change.account.toLowerCase() === toAddress?.toLowerCase()
+    );
+
+    const fromBalanceDifference = fromAddressBalanceChange
+      ? computeUsdDifference(fromAddressBalanceChange)
+      : 0;
+
+    if (typeof toBalanceDifference === "number") {
+      sum += toBalanceDifference;
+    }
+    if (typeof fromBalanceDifference === "number") {
+      sum += fromBalanceDifference;
     }
 
     if (
