@@ -3358,8 +3358,8 @@ function detectMEV(logDataArray, allTxDetails) {
         processedLogArray[middleIdx].mev = {
           type: "sandwich",
           role: "victim",
-          indexAttackerFirst: i - 1,
-          indexAttackerLast: i + 1,
+          indexAttackerFirst: i,
+          indexAttackerLast: i + 2,
         };
       }
 
@@ -3368,8 +3368,8 @@ function detectMEV(logDataArray, allTxDetails) {
           type: "sandwich",
           role: "attacker",
           txn: "last",
-          indexFirst: i - 2,
-          indexVictim: i - 1,
+          indexFirst: i,
+          indexVictim: i + 1,
         };
       }
 
