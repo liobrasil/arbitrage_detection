@@ -3349,10 +3349,9 @@ async function processBlockTransactions(blockNumber) {
 
     let txnFees;
     if (gasUsed) {
-      txnFees =
-        Number(gasUsed.toString()) * Number(ethers.formatEther(gasPrice));
+      txnFees = Number(gasUsed * ethers.formatEther(gasPrice));
     }
-    let txnFeesUsd = txnFees * priceMap["BNB-USDT"];
+    let txnFeesUsd = Number(txnFees * priceMap["BNB-USDT"]);
 
     let { builderTransfer, toBuilderTransfer, paymentValueTransfer } =
       await getBuilderPaymentTransactionsOnTransfer(toAddress, value);
@@ -3532,7 +3531,7 @@ async function processBlockTransactions(blockNumber) {
           profit_usd: profitUsd,
           revenue_usd_bis: revenueUsdBis,
           profit_usd_bis: profitUsdBis,
-          percentage_revenue_bis: (txnFeesUsd / revenueUsdBis) * 100,
+          percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
         },
         ...(botBalance > 0 ? { bot_balance: botBalance, balances } : {}),
         ...(paymentValue > 0
@@ -3542,7 +3541,7 @@ async function processBlockTransactions(blockNumber) {
               payment_value: paymentValue,
               payment_value_usd: usdPaymentValue,
               percentage_payment_bis:
-                (usdPaymentValue / (revenueUsdBis - txnFeesUsd)) * 100,
+                100 * (usdPaymentValue / (revenueUsdBis - txnFeesUsd)),
             }
           : {}),
       };
