@@ -3326,7 +3326,6 @@ function detectMEV(logDataArray, allTxDetails) {
   // Create a copy of logDataArray with default arbitrage
   const processedLogArray = logDataArray.map((item) => ({
     ...item,
-    mev: { type: "arbitrage" },
   }));
 
   // Find corresponding logDataArray element by position
@@ -3341,7 +3340,8 @@ function detectMEV(logDataArray, allTxDetails) {
     if (allTxDetails[i].to === allTxDetails[i + 2].to) {
       // Get indices in processedLogArray
       const firstIdx = findByPosition(i);
-      const lastIdx = findByPosition(i + 1);
+      const middleIdx = findByPosition(i + 1);
+      const lastIdx = findByPosition(i + 2);
 
       // Update MEV type if transactions are in our processedLogArray
       if (firstIdx !== -1) {
@@ -3349,7 +3349,17 @@ function detectMEV(logDataArray, allTxDetails) {
           type: "sandwich",
           role: "attacker",
           txn: "first",
-          indexLast: i + 1,
+          indexLast: i + 2,
+          indexVictim: i + 1,
+        };
+      }
+
+      if (middleIdx !== -1) {
+        processedLogArray[middleIdx].mev = {
+          type: "sandwich",
+          role: "victim",
+          indexAttackerFirst: i - 1,
+          indexAttackerLast: i + 1,
         };
       }
 
@@ -3358,7 +3368,8 @@ function detectMEV(logDataArray, allTxDetails) {
           type: "sandwich",
           role: "attacker",
           txn: "last",
-          indexFirst: i,
+          indexFirst: i - 2,
+          indexVictim: i - 1,
         };
       }
 
