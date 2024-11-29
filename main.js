@@ -3394,7 +3394,6 @@ async function processBlockTransactions(blockNumber) {
     let { builderTransfer, toBuilderTransfer, paymentValueTransfer } =
       await getBuilderPaymentTransactionsOnTransfer(txHash);
 
-    console.log("paymentValueTransfer", paymentValueTransfer);
     if (paymentValueTransfer > 0) {
       const logDataPaymentTransfer = {
         timestamp: getTimestamp(),
