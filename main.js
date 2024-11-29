@@ -3262,6 +3262,12 @@ async function getInternalTransactions(txHash) {
         }
       }
     }
+
+    return {
+      builderTransfer: "",
+      toBuilderTransfer: "",
+      paymentValueTransfer: 0,
+    };
   } catch (error) {
     console.error("Error fetching internal transactions:", error.message);
   }
