@@ -3304,7 +3304,7 @@ async function getBuilderPaymentTransactionsOnTransfer(txHash) {
       for (const builder of builders) {
         if (builder.addresses.includes(normalizedTo)) {
           console.log(
-            `${builder.name.toUpperCase()} PAYMENT: To: ${to}, Amount: ${value} BNB`
+            `${builder.name.toUpperCase()} SINGLE PAYMENT: To: ${to}, Amount: ${value} BNB`
           );
           return {
             builderTransfer: builder.name,
@@ -3406,6 +3406,8 @@ async function processBlockTransactions(blockNumber) {
         block_number: blockNumber,
         position: i,
         nonce,
+        is_single_transfer: true,
+        data: txDetails.data,
         gas_limit: Number(gasLimit.toString()),
         gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
         gas_used: Number(gasUsed.toString()),
