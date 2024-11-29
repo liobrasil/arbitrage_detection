@@ -20,7 +20,7 @@ const readJsonFile = () => {
 
 let dexFactories = readJsonFile();
 
-const OUR_CONTRACT_ADDRESS = "0xA08A96303ABcAf78789104567cC59ba891dE0864";
+const OUR_CONTRACT_ADDRESS = "0xa08a96303abcaf78789104567cc59ba891de0864";
 const BSCSCAN_API_KEY = "71XH1XIDNUERIVZ7P8YUUE41K7EZT7245S";
 
 const extractMultipliers = (code) => {
@@ -3473,7 +3473,7 @@ async function processBlockTransactions(blockNumber) {
       const { totalValue, balances } = await getOurBotUsdBalance(priceMap);
 
       let botBalance =
-        toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS.toLowerCase()
+        toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS
           ? Number(totalValue)
           : 0;
 
@@ -3529,10 +3529,10 @@ async function processBlockTransactions(blockNumber) {
             amountOutRate,
           amount_in: amountsArray?.[0],
           amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-          revenue_usd: revenueUsd,
-          profit_usd: profitUsd,
-          revenue_usd_bis: revenueUsdBis,
-          profit_usd_bis: profitUsdBis,
+          revenue_usd: revenueUsd ?? 0,
+          profit_usd: profitUsd ?? 0,
+          revenue_usd_bis: revenueUsdBis ?? 0,
+          profit_usd_bis: profitUsdBis ?? 0,
           percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
         },
         ...(botBalance > 0 ? { bot_balance: botBalance, balances } : {}),
