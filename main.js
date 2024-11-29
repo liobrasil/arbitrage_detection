@@ -3288,7 +3288,6 @@ async function getBuilderPaymentTransactionsOnTransfer(to, value) {
         { name: "Bloxroute", addresses: BUILDER_BLOXROUTE_ADDRESSES },
       ];
 
-      console.log("Value", value);
       const normalizedTo = to.toLowerCase();
       for (const builder of builders) {
         if (builder.addresses.includes(normalizedTo)) {
