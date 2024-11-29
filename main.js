@@ -3322,6 +3322,53 @@ function formatBalances(balances) {
   }, {});
 }
 
+function detectMEV(logDataArray, allTxDetails) {
+  // Create a copy of logDataArray with default arbitrage
+  const processedLogArray = logDataArray.map((item) => ({
+    ...item,
+    mev: { type: "arbitrage" },
+  }));
+
+  // Find corresponding logDataArray element by position
+  function findByPosition(positionInBlock) {
+    return processedLogArray.findIndex(
+      (log) => log.position === positionInBlock
+    );
+  }
+
+  // Iterate through all transactions
+  for (let i = 0; i < allTxDetails.length - 2; i++) {
+    if (allTxDetails[i].to === allTxDetails[i + 2].to) {
+      // Get indices in processedLogArray
+      const firstIdx = findByPosition(i);
+      const lastIdx = findByPosition(i + 1);
+
+      // Update MEV type if transactions are in our processedLogArray
+      if (firstIdx !== -1) {
+        processedLogArray[firstIdx].mev = {
+          type: "sandwich",
+          role: "attacker",
+          txn: "first",
+          indexLast: i + 1,
+        };
+      }
+
+      if (lastIdx !== -1) {
+        processedLogArray[lastIdx].mev = {
+          type: "sandwich",
+          role: "attacker",
+          txn: "last",
+          indexFirst: i,
+        };
+      }
+
+      i += 2;
+    }
+  }
+
+  return processedLogArray;
+}
+
 // Updated main function
 async function processBlockTransactions(blockNumber) {
   let totalArbitrageCount = 0;
@@ -3331,12 +3378,15 @@ async function processBlockTransactions(blockNumber) {
   ]);
 
   let sum = 0;
+  let logDataArray = [];
+  let allTxDetails = [];
 
   for (let i = 0; i < transactions.length; i++) {
     let revenueUsdBis = 0;
     const txHash = transactions[i];
 
     const txDetails = await provider.getTransaction(txHash);
+    allTxDetails.push(txDetails);
     const gasLimit = txDetails.gasLimit;
     const gasPrice = txDetails.gasPrice;
     const toAddress = txDetails?.to; // error pop out
@@ -3557,11 +3607,13 @@ async function processBlockTransactions(blockNumber) {
           : {}),
       };
 
-      writeToLogFile(logData);
+      logDataArray.push(logData);
 
       console.log(JSON.stringify(logData));
     }
   }
+  const logDataArray2 = detectMEV(logDataArray, allTxDetails);
+  for (const logData of logDataArray2) writeToLogFile(logData);
 
   console.log("Finished block processing", blockNumber);
   console.log(
