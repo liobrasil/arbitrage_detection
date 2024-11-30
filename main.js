@@ -3347,6 +3347,8 @@ function detectMEV(logDataArray, allTxDetails) {
       const middleIdx = findByPosition(i + 1);
       const lastIdx = findByPosition(i + 2);
 
+      if (processedLogArray[middleIdx]?.payment_value_usd > 0) break; // no MEV if payment value is positive
+
       // Update MEV type if transactions are in our processedLogArray
       if (firstIdx !== -1) {
         processedLogArray[firstIdx].mev = {
