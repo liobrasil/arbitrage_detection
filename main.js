@@ -3337,6 +3337,7 @@ function detectMEV(logDataArray, allTxDetails) {
 
   // Iterate through all transactions
   for (let i = 0; i < allTxDetails.length - 2; i++) {
+    if (i > 15) break; // position too high for arbitrage to occur (NOT SAFE)
     if (
       allTxDetails[i].to === allTxDetails[i + 2].to &&
       allTxDetails[i].to != allTxDetails[i + 1].to // no sequential txns to the same account
@@ -3345,15 +3346,6 @@ function detectMEV(logDataArray, allTxDetails) {
       const firstIdx = findByPosition(i);
       const middleIdx = findByPosition(i + 1);
       const lastIdx = findByPosition(i + 2);
-
-      let firstAttackerCondition =
-        firstIdx !== -1 && !processedLogArray[firstIdx]?.paymentValue;
-      let lastAttackerCondition =
-        lastIdx !== -1 && !processedLogArray[lastIdx]?.paymentValue;
-      let victimCondition =
-        middleIdx !== -1 && processedLogArray[middleIdx]?.paymentValue > 0;
-
-      if (firstAttackerCondition || lastAttackerCondition) break; // no MEV if no bribe for attacker
 
       if (victimCondition) break; // no MEV if victim bribe exists
 
