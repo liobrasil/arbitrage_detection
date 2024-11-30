@@ -3347,11 +3347,11 @@ function detectMEV(logDataArray, allTxDetails) {
       const lastIdx = findByPosition(i + 2);
 
       if (
-        processedLogArray[middleIdx]?.payment_value_usd > 0 ||
-        (!processedLogArray[firstIdx]?.paymentValue &&
-          !processedLogArray[lastIdx]?.paymentValue)
+        (firstIdx !== -1 && !processedLogArray[firstIdx]?.paymentValue) ||
+        (lastIdx !== -1 && !processedLogArray[lastIdx]?.paymentValue) ||
+        (middleIdx !== -1 && processedLogArray[middleIdx]?.paymentValue > 0)
       )
-        break; // no MEV if payment value is positive for victim or no bribe for attacker
+        break; // no MEV if no bribe for attacker or victim bribe exists
 
       // Update MEV type if transactions are in our processedLogArray
       if (firstIdx !== -1) {
