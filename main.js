@@ -3348,8 +3348,8 @@ function detectMEV(logDataArray, allTxDetails) {
 
       if (
         processedLogArray[middleIdx]?.payment_value_usd > 0 ||
-        !processedLogArray[firstIdx]?.paymentValue ||
-        !processedLogArray[lastIdx]?.paymentValue
+        (!processedLogArray[firstIdx]?.paymentValue &&
+          !processedLogArray[lastIdx]?.paymentValue)
       )
         break; // no MEV if payment value is positive for victim or no bribe for attacker
 
