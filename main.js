@@ -3347,8 +3347,8 @@ function detectMEV(logDataArray, allTxDetails) {
       const lastIdx = findByPosition(i + 2);
 
       if (
-        (firstIdx !== -1 && !processedLogArray[firstIdx]?.paymentValue) ||
-        (lastIdx !== -1 && !processedLogArray[lastIdx]?.paymentValue) ||
+        (firstIdx !== -1 && !processedLogArray[firstIdx]?.paymentValue > 0) ||
+        (lastIdx !== -1 && !processedLogArray[lastIdx]?.paymentValue > 0) ||
         (middleIdx !== -1 && processedLogArray[middleIdx]?.paymentValue > 0)
       )
         break; // no MEV if no bribe for attacker or victim bribe exists
