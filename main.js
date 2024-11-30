@@ -3337,6 +3337,7 @@ function detectMEV(logDataArray, allTxDetails) {
 
   // Iterate through all transactions
   for (let i = 0; i < allTxDetails.length - 2; i++) {
+    if (i > 18) break; // equivalence to 6 sandwiches, I don't believe we've sandwiches after
     if (allTxDetails[i].to === allTxDetails[i + 2].to) {
       // Get indices in processedLogArray
       const firstIdx = findByPosition(i);
@@ -3435,7 +3436,7 @@ async function processBlockTransactions(blockNumber) {
         from: fromAddress,
         to: toAddress,
         txn_hash: txHash,
-        block_number: blockNumber,
+        block_number: Number(blockNumber),
         position: i,
         nonce,
         is_single_transfer: true,
@@ -3568,7 +3569,7 @@ async function processBlockTransactions(blockNumber) {
           to: toAddress,
           txn_hash: txHash,
           is_path_valid: dexPath.length == tokenPath.length && isValidPath,
-          block_number: blockNumber,
+          block_number: Number(blockNumber),
           position: i,
           nonce,
           gas_limit: Number(gasLimit.toString()),
