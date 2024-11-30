@@ -3338,7 +3338,10 @@ function detectMEV(logDataArray, allTxDetails) {
   // Iterate through all transactions
   for (let i = 0; i < allTxDetails.length - 2; i++) {
     if (i > 18) break; // equivalence to 6 sandwiches, I don't believe we've sandwiches after
-    if (allTxDetails[i].to === allTxDetails[i + 2].to) {
+    if (
+      allTxDetails[i].to === allTxDetails[i + 2].to &&
+      allTxDetails[i].to != allTxDetails[i + 1].to // no sequential txns to the same account
+    ) {
       // Get indices in processedLogArray
       const firstIdx = findByPosition(i);
       const middleIdx = findByPosition(i + 1);
