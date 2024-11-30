@@ -3337,7 +3337,7 @@ function detectMEV(logDataArray, allTxDetails) {
 
   // Iterate through all transactions
   for (let i = 0; i < allTxDetails.length - 2; i++) {
-    if (i > 15) break; // position too high for arbitrage to occur (NOT SAFE)
+    if (i > 24) break; // position (3x 8 1BeefSandwich) too high for arbitrage to occur (NOT SAFE)
     if (
       allTxDetails[i].to === allTxDetails[i + 2].to &&
       allTxDetails[i].to != allTxDetails[i + 1].to // no sequential txns to the same account
