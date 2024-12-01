@@ -3346,14 +3346,14 @@ function detectMEV(logDataArray, allTxDetails) {
       const middleIdx = findByPosition(i + 1);
       const lastIdx = findByPosition(i + 2);
 
-      // if (
-      //   !processedLogArray[firstIdx]?.paymentValue &&
-      //   !processedLogArray[lastIdx]?.paymentValue
-      // )
-      //   break;
+      if (
+        !processedLogArray[firstIdx]?.payment_value &&
+        !processedLogArray[lastIdx]?.payment_value
+      )
+        break;
 
       let victimCondition =
-        middleIdx !== -1 && processedLogArray[middleIdx]?.paymentValue;
+        middleIdx !== -1 && processedLogArray[middleIdx]?.payment_value;
       if (victimCondition) break; // no MEV if victim bribe exists
 
       // Update MEV type if transactions are in our processedLogArray
