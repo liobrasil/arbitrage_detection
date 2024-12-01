@@ -3347,7 +3347,7 @@ function detectMEV(logDataArray, allTxDetails) {
       const lastIdx = findByPosition(i + 2);
 
       if (
-        !processedLogArray[firstIdx]?.paymentValue ||
+        !processedLogArray[firstIdx]?.paymentValue &&
         !processedLogArray[lastIdx]?.paymentValue
       )
         break;
