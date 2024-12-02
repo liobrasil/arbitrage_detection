@@ -3103,8 +3103,6 @@ async function processBlockTransactions(blockNumber) {
         }
       }
 
-      const { totalValue, balances } = await getOurBotUsdBalance(priceMap);
-
       let botBalance =
         toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS
           ? Number(totalValue)
