@@ -20,48 +20,6 @@ const readJsonFile = () => {
 
 let dexFactories = readJsonFile();
 
-const OUR_CONTRACT_ADDRESS = "0xa08a96303abcaf78789104567cc59ba891de0864";
-const BSCSCAN_API_KEY = "71XH1XIDNUERIVZ7P8YUUE41K7EZT7245S";
-
-const extractMultipliers = (code) => {
-  try {
-    // Regular expressions to match base and fee multipliers
-    const base0Pattern = /balance0\.mul\((\d+)\)/;
-    const base1Pattern = /balance1\.mul\((\d+)\)/;
-    const fee0Pattern = /amount0In\.mul\((\d+)\)/;
-    const fee1Pattern = /amount1In\.mul\((\d+)\)/;
-
-    // Find matches
-    const base0Match = code.match(base0Pattern);
-    const base1Match = code.match(base1Pattern);
-    const fee0Match = code.match(fee0Pattern);
-    const fee1Match = code.match(fee1Pattern);
-
-    if ((!base0Match && !fee0Match) || (!base1Match && !fee1Match)) {
-      return {
-        success: false,
-        error: "Could not find all multipliers",
-      };
-    }
-
-    // Extract values
-    const base0 = parseInt(base0Match[1]);
-    const base1 = parseInt(base1Match[1]);
-    const fee0 = parseInt(fee0Match[1]);
-    const fee1 = parseInt(fee1Match[1]);
-
-    return {
-      success: true,
-      fee: (fee0 * 100 * 10000) / base0,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-};
-
 // Function to add a factory
 const addFactory = async (key, value) => {
   // Read the existing JSON data
@@ -94,39 +52,6 @@ const addFactory = async (key, value) => {
       return;
     }
 
-    const isContractVerified = await checkContractsVerified([value]);
-
-    if (isContractVerified.length > 0 && isContractVerified[0].verified) {
-      const contractDatas = await fetchContractCode(value);
-
-      const multipliers = extractMultipliers(contractDatas.sourceCode);
-
-      if (multipliers.success) {
-        key = contractDatas.contractName;
-        if (Object.keys(dexFactories).includes(key)) {
-          key = `${contractDatas.contractName}_${
-            Object.keys(dexFactories).length
-          }`;
-        }
-
-        const logNewContract = {
-          ...{
-            timestamp: getTimestamp(),
-            level: "INFO",
-            _type: "NewDexes",
-            _appid: "adfl_bsc_mev_analyse",
-          },
-          ...contractDatas,
-          address: value,
-          fees: multipliers.fee,
-
-          nameInDexFactory: key,
-        };
-
-        writeToLogFile(logNewContract);
-      }
-    }
-
     // Add the new factory
     jsonData[key] = value;
 
@@ -146,58 +71,9 @@ const addFactory = async (key, value) => {
 };
 
 // Configuration
-const IPC_PATH = "/data/bsc/geth.fast/geth.ipc";
 const KUCOIN_API_URL = "https://api.kucoin.com/api/v1/market/allTickers";
 const HUOBI_API_URL = "https://api.huobi.pro/market/tickers";
 const OKX_API_URL = "https://www.okx.com/api/v5/market/tickers?instType=SPOT";
-
-const BUILDER_JETBLDR_ADDRESSES = [
-  "0x345324dc15f1cdcf9022e3b7f349e911fb823b4c",
-];
-
-const BUILDER_TXBOOST_ADDRESSES = [
-  "0x6dddf681c908705472d09b1d7036b2241b50e5c7", // Txboost: Builder 1
-  "0x76736159984ae865a9b9cc0df61484a49da68191", // Txboost: Builder 2
-  "0x5054b21d8baea3d602dca8761b235ee10bc0231e", // Txboost: Builder 3
-];
-
-const BUILDER_PUISSANT_ADDRESSES = [
-  "0x487e5dfe70119c1b320b8219b190a6fa95a5bb48", // Puissant: Builder 1
-  "0x48b4bbebf0655557a461e91b8905b85864b8bb48", // Puissant: Builder 2
-  "0x48fee1bb3823d72fdf80671ebad5646ae397bb48", // Puissant: Builder 3
-  "0x48b2665e5e9a343409199d70f7495c8ab660bb48", // Puissant: Builder 4
-  "0x48a5ed9abc1a8fbe86cec4900483f43a7f2dbb48", // Puissant: Builder 5
-  "0x4848489f0b2bedd788c696e2d79b6b69d7484848", // Puissant: Payment
-];
-const BUILDER_NODEREAL_ADDRESSES = [
-  "0x79102db16781dddff63f301c9be557fd1dd48fa0", // Nodereal: Builder 1
-  "0xd0d56b330a0dea077208b96910ce452fd77e1b6f", // Nodereal: Builder 2
-  "0x4f24ce4cd03a6503de97cf139af2c26347930b99", // Nodereal: Builder 3
-];
-const BUILDER_BLOCKSMITH_ADDRESSES = [
-  "0x0000000000007592b04bb3bb8985402cc37ca224",
-  "0x6af484eabbcf3cbdf603df87d3ace75de13c28f3",
-];
-const BUILDER_BLOCKRAZOR_ADDRESSES = [
-  "0x1266c6be60392a8ff346e8d5eccd3e69dd9c5f20", // BlockRazor: Payment
-  "0x5532cdb3c0c4278f9848fc4560b495b70ba67455", // Blockrazor: Builder 1
-  "0x49d91b1ab0cc6a1591c2e5863e602d7159d36149", // Blockrazor: Builder 2
-  "0xba4233f6e478db76698b0a5000972af0196b7be1", // Blockrazor: Builder 3
-  "0x539e24781f616f0d912b60813ab75b7b80b75c53", // Blockrazor: Builder 4
-  "0x50061047b9c7150f0dc105f79588d1b07d2be250", // Blockrazor: Builder 5
-  "0x488e37fcb2024a5b2f4342c7de636f0825de6448", // Blockrazor: Builder 6
-  "0x0557e8cb169f90f6ef421a54e29d7dd0629ca597", // Blockrazor: Builder 7
-];
-const BUILDER_BLOXROUTE_ADDRESSES = [
-  "0x74c5f8c6ffe41ad4789602bdb9a48e6cad623520",
-  "0xd4376fdc9b49d90e6526daa929f2766a33bffd52", // Bloxroute: Builder 1
-  "0x2873fc7ad9122933becb384f5856f0e87918388d", // Bloxroute: Builder 2
-  "0x432101856a330aafdeb049dd5fa03a756b3f1c66", // Bloxroute: Builder 3
-  "0x2b217a4158933aade6d6494e3791d454b4d13ae7", // Bloxroute: Builder 4
-  "0x0da52e9673529b6e06f444fbbed2904a37f66415", // Bloxroute: Builder 5
-  "0xe1ec1aece7953ecb4539749b9aa2eef63354860a", // Bloxroute: Builder 6
-  "0x89434fc3a09e583f2cb4e47a8b8fe58de8be6a15", // Bloxroute: Builder 7
-];
 
 //ERC20 ABI
 const erc20Abi = [
@@ -466,101 +342,6 @@ const erc20Abi = [
     type: "function",
   },
 ];
-
-async function checkContractsVerified(contractAddresses) {
-  const results = [];
-
-  for (const address of contractAddresses) {
-    const url = `https://api.bscscan.com/api?module=contract&action=getabi&address=${address}&apikey=${BSCSCAN_API_KEY}`;
-    try {
-      const response = await axios.get(url);
-      const data = response.data;
-
-      results.push({
-        address: address,
-        verified: data.status === "1", // true if verified, false otherwise
-      });
-    } catch (error) {
-      console.error(`Error checking address ${address}:`, error.message);
-      results.push({
-        address: address,
-        verified: null, // null indicates an error occurred
-      });
-    }
-  }
-
-  return results;
-}
-
-async function getOurBotUsdBalance(priceMap) {
-  let walletAddress = OUR_CONTRACT_ADDRESS;
-
-  // Token addresses from your portfolio
-  const tokens = [
-    { symbol: "WBNB", address: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c" },
-    { symbol: "USDT", address: "0x55d398326f99059fF775485246999027B3197955" },
-    { symbol: "BUSD", address: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56" },
-    { symbol: "ETH", address: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8" },
-    { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d" },
-    { symbol: "BTCB", address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c" },
-    { symbol: "ADA", address: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47" },
-    { symbol: "MATIC", address: "0xCC42724C6683B7E57334c4E856f4c9965ED682bD" },
-    { symbol: "DAI", address: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3" },
-  ];
-
-  const balances = [];
-
-  for (const token of tokens) {
-    try {
-      const contract = new ethers.Contract(token.address, erc20Abi, provider);
-
-      // Get balance and decimals in parallel
-      const [balance, decimals] = await Promise.all([
-        contract.balanceOf(walletAddress),
-        contract.decimals(),
-      ]);
-
-      // Convert balance to human readable format
-      const formattedBalance = ethers.formatUnits(balance, decimals);
-
-      // Handle WBNB to BNB symbol conversion
-      let symbol = token.symbol;
-      if (symbol === "WBNB") {
-        symbol = "BNB";
-      }
-
-      // Create symbol pairs for price mapping
-      const symbolToUSDT = `${symbol}-USDT`;
-      const symbolToUSDC = `${symbol}-USDC`;
-      const symbolToUSD = `${symbol}-USD`;
-
-      // Fetch the price from the price map
-      const priceInUSD =
-        priceMap[symbolToUSDT] ||
-        priceMap[symbolToUSDC] ||
-        priceMap[symbolToUSD] ||
-        0;
-
-      balances.push({
-        symbol: token.symbol,
-        address: token.address,
-        balance: formattedBalance,
-        rawBalance: balance.toString(),
-        priceUSD: priceInUSD,
-        valueUSD: parseFloat(formattedBalance) * priceInUSD,
-      });
-    } catch (error) {
-      console.error(
-        `Error fetching balance for ${token.symbol}:`,
-        error.message
-      );
-    }
-  }
-
-  // Calculate total portfolio value
-  const totalValue = balances.reduce((sum, token) => sum + token.valueUSD, 0);
-  return { totalValue, balances };
-}
 
 // Function to find the DEX name by address
 function getDexNameByAddress(address) {
@@ -2471,7 +2252,7 @@ function writeToLogFile(data) {
 }
 
 // Initialize Ethereum provider
-const provider = new ethers.IpcSocketProvider(IPC_PATH);
+const provider = new ethers.WebSocketProvider();
 
 // Function to fetch all transactions for a given block
 async function fetchTransactions(blockNumber) {
@@ -2512,28 +2293,6 @@ function getUniqueFormattedPairs(dexPath, tokenPath) {
 
   // Convert the set to an array and join with " and " as separator
   return uniquePairs;
-}
-
-async function fetchContractCode(contractAddress) {
-  try {
-    const response = await axios.get(
-      `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${BSCSCAN_API_KEY}`
-    );
-
-    const { data } = response;
-
-    return {
-      sourceCode: data.result[0].SourceCode.replace(/\r\n/g, " "),
-      contractName: data.result[0].ContractName,
-      abi: JSON.stringify(JSON.parse(data.result[0].ABI), 2, null),
-    };
-  } catch (error) {
-    return {
-      sourceCode: "",
-      contractName: "",
-      abi: "",
-    };
-  }
 }
 
 // Function to check if the transaction contains at least two "Swap" events (V2, V3, Curve, Balancer, 1inch, Kyber, dYdX)
@@ -3216,181 +2975,11 @@ function computeUsdDifference(balanceChanges) {
   return difference;
 }
 
-// Function to trace internal transactions
-async function getInternalTransactions(txHash) {
-  try {
-    // Call debug_traceTransaction
-    const trace = await provider.send("debug_traceTransaction", [
-      txHash,
-      {
-        tracer: "callTracer",
-      },
-    ]);
-
-    // Array of builder configurations
-    const builders = [
-      { name: "Puissant", addresses: BUILDER_PUISSANT_ADDRESSES },
-      { name: "Jetbldr", addresses: BUILDER_JETBLDR_ADDRESSES },
-      { name: "Txboost", addresses: BUILDER_TXBOOST_ADDRESSES },
-      { name: "Nodereal", addresses: BUILDER_NODEREAL_ADDRESSES },
-      { name: "Blocksmith", addresses: BUILDER_BLOCKSMITH_ADDRESSES },
-      { name: "BlockRazor", addresses: BUILDER_BLOCKRAZOR_ADDRESSES },
-      { name: "Bloxroute", addresses: BUILDER_BLOXROUTE_ADDRESSES },
-    ];
-
-    for (const log of trace.calls) {
-      if (log.type === "CALL" && log?.value) {
-        const to = log.to;
-        const value = ethers.formatEther(BigInt(log.value)); // Extract value
-
-        // If value is not zero, process the transaction
-        if (Number(value) !== 0) {
-          const normalizedTo = to.toLowerCase();
-
-          // Loop through builders to find a match
-          for (const builder of builders) {
-            if (builder.addresses.includes(normalizedTo)) {
-              console.log(
-                `${builder.name.toUpperCase()} PAYMENT: To: ${to}, Amount: ${value} BNB`
-              );
-
-              return {
-                builder: builder.name,
-                toBuilder: to,
-                paymentValue: Number(value),
-              };
-            }
-          }
-        }
-      }
-    }
-
-    return {
-      builder: "",
-      toBuilder: "",
-      paymentValue: 0,
-    };
-  } catch (error) {
-    console.error("Error fetching internal transactions:", error.message);
-  }
-}
-
-// Function to get builder payment transactions
-async function getBuilderPaymentTransactionsOnTransfer(to, value) {
-  try {
-    // Switch-based logic
-    if (Number(value) !== 0) {
-      const builders = [
-        { name: "Puissant", addresses: BUILDER_PUISSANT_ADDRESSES },
-        { name: "Jetbldr", addresses: BUILDER_JETBLDR_ADDRESSES },
-        { name: "Txboost", addresses: BUILDER_TXBOOST_ADDRESSES },
-        { name: "Nodereal", addresses: BUILDER_NODEREAL_ADDRESSES },
-        { name: "Blocksmith", addresses: BUILDER_BLOCKSMITH_ADDRESSES },
-        { name: "BlockRazor", addresses: BUILDER_BLOCKRAZOR_ADDRESSES },
-        { name: "Bloxroute", addresses: BUILDER_BLOXROUTE_ADDRESSES },
-      ];
-
-      const normalizedTo = to.toLowerCase();
-      for (const builder of builders) {
-        if (builder.addresses.includes(normalizedTo)) {
-          console.log(
-            `${builder.name.toUpperCase()} SINGLE PAYMENT: To: ${to}, Amount: ${value} BNB`
-          );
-          return {
-            builderTransfer: builder.name,
-            toBuilderTransfer: to,
-            paymentValueTransfer: Number(value),
-          };
-        }
-      }
-    }
-
-    return {
-      builderTransfer: "",
-      toBuilderTransfer: "",
-      paymentValueTransfer: 0,
-    };
-  } catch (error) {
-    console.error("Error fetching internal transactions:", error.message);
-  }
-}
-
 function formatBalances(balances) {
   return balances.reduce((acc, item) => {
     acc[item.symbol] = Number(item.balance);
     return acc;
   }, {});
-}
-
-function detectMEV(logDataArray, allTxDetails) {
-  // Create a copy of logDataArray with default arbitrage
-  const processedLogArray = logDataArray.map((item) => ({
-    ...item,
-  }));
-
-  // Find corresponding logDataArray element by position
-  function findByPosition(positionInBlock) {
-    return processedLogArray.findIndex(
-      (log) => log.position === positionInBlock
-    );
-  }
-
-  // Iterate through all transactions
-  for (let i = 0; i < allTxDetails.length - 2; i++) {
-    if (
-      allTxDetails[i].to === allTxDetails[i + 2].to &&
-      allTxDetails[i].to != allTxDetails[i + 1].to // no sequential txns to the same account
-    ) {
-      // Get indices in processedLogArray
-      const firstIdx = findByPosition(i);
-      const middleIdx = findByPosition(i + 1);
-      const lastIdx = findByPosition(i + 2);
-
-      if (
-        !processedLogArray[firstIdx]?.payment_value &&
-        !processedLogArray[lastIdx]?.payment_value
-      )
-        break;
-
-      let victimCondition =
-        middleIdx !== -1 && processedLogArray[middleIdx]?.payment_value;
-      if (victimCondition) break; // no MEV if victim bribe exists
-
-      // Update MEV type if transactions are in our processedLogArray
-      if (firstIdx !== -1) {
-        processedLogArray[firstIdx].mev = {
-          type: "sandwich",
-          role: "attacker",
-          txn: "first",
-          indexLast: i + 2,
-          indexVictim: i + 1,
-        };
-      }
-
-      if (middleIdx !== -1) {
-        processedLogArray[middleIdx].mev = {
-          type: "sandwich",
-          role: "victim",
-          indexAttackerFirst: i,
-          indexAttackerLast: i + 2,
-        };
-      }
-
-      if (lastIdx !== -1) {
-        processedLogArray[lastIdx].mev = {
-          type: "sandwich",
-          role: "attacker",
-          txn: "last",
-          indexFirst: i,
-          indexVictim: i + 1,
-        };
-      }
-
-      i += 2;
-    }
-  }
-
-  return processedLogArray;
 }
 
 // Updated main function
@@ -3436,37 +3025,6 @@ async function processBlockTransactions(blockNumber) {
     }
     let txnFeesUsd = txnFees * priceMap["BNB-USDT"];
 
-    let { builderTransfer, toBuilderTransfer, paymentValueTransfer } =
-      await getBuilderPaymentTransactionsOnTransfer(toAddress, value);
-
-    if (paymentValueTransfer > 0) {
-      const logDataPaymentTransfer = {
-        timestamp: getTimestamp(),
-        level: "INFO",
-        _type: "MevSinglePayment",
-        _appid: "adfl_bsc_mev_analyse",
-        from: fromAddress,
-        to: toAddress,
-        txn_hash: txHash,
-        block_number: blockNumber.toString(),
-        position: i,
-        nonce,
-        is_single_transfer: true,
-        data: txDetails.data,
-        gas_limit: Number(gasLimit.toString()),
-        gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
-        gas_used: Number(gasUsed?.toString()),
-        txn_fees: Number(txnFees),
-        txn_fees_usd: txnFeesUsd,
-        builder: builderTransfer,
-        toBuilder: toBuilderTransfer,
-        payment_value: paymentValueTransfer,
-        payment_value_usd: paymentValueTransfer * priceMap["BNB-USDT"],
-      };
-
-      writeToLogFile(logDataPaymentTransfer);
-    }
-
     if (!hasSwapEvent) continue;
 
     const balanceChanges = await getBalanceChanges(txHash, priceMap);
@@ -3500,13 +3058,7 @@ async function processBlockTransactions(blockNumber) {
       fromBalanceDifference ||
       fromBalanceDifference === 0
     ) {
-      let { builder, toBuilder, paymentValue } = await getInternalTransactions(
-        txHash
-      );
-
       totalArbitrageCount++;
-
-      let usdPaymentValue = paymentValue * priceMap["BNB-USDT"];
 
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
@@ -3562,73 +3114,52 @@ async function processBlockTransactions(blockNumber) {
         dexPath.length == tokenPath.length ? Number(toBalanceDifference) : 0;
 
       let profitUsd =
-        dexPath.length == tokenPath.length
-          ? revenueUsd - txnFeesUsd - usdPaymentValue
-          : 0;
+        dexPath.length == tokenPath.length ? revenueUsd - txnFeesUsd : 0;
 
       let profitUsdBis =
-        dexPath.length == tokenPath.length
-          ? revenueUsdBis - txnFeesUsd - usdPaymentValue
-          : 0;
+        dexPath.length == tokenPath.length ? revenueUsdBis - txnFeesUsd : 0;
 
       const logData = {
-        ...{
-          timestamp: getTimestamp(),
-          level: "INFO",
-          _type: "MevAnalyse",
-          _appid: "adfl_bsc_mev_analyse",
-          from: fromAddress,
-          to: toAddress,
-          txn_hash: txHash,
-          is_path_valid: dexPath.length == tokenPath.length && isValidPath,
-          block_number: blockNumber.toString(),
-          position: i,
-          nonce,
-          gas_limit: Number(gasLimit.toString()),
-          gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
-          gas_used: Number(gasUsed.toString()),
-          txn_fees: Number(txnFees),
-          txn_fees_usd: txnFeesUsd,
-          token_path: tokenPath,
-          venue_path: dexPath,
-          new_dex: newDexes,
-          hot_pairs: uniqueFormatted,
-          token_in_bis: tokenIn,
-          token_out_bis: tokenOut,
-          venues_addresses: venueAddresses,
-          is_new_dex_verified:
-            newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
-          nb_swap: swapEventCount,
-          amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
-          amount_out_solo: Number(
-            amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
-          ),
-          amount_in_usd_solo:
-            Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
-          amount_out_usd_solo:
-            Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
-            amountOutRate,
-          amount_in: amountsArray?.[0],
-          amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-          revenue_usd: revenueUsd,
-          profit_usd: profitUsd,
-          revenue_usd_bis: revenueUsdBis,
-          profit_usd_bis: profitUsdBis,
-          percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
-        },
-        ...(botBalance > 0
-          ? { bot_balance: botBalance, botBalances: formatBalances(balances) }
-          : {}),
-        ...(paymentValue > 0
-          ? {
-              builder,
-              toBuilder,
-              payment_value: paymentValue,
-              payment_value_usd: usdPaymentValue,
-              percentage_payment_bis:
-                100 * (usdPaymentValue / (revenueUsdBis - txnFeesUsd)),
-            }
-          : {}),
+        timestamp: getTimestamp(),
+        level: "INFO",
+        _type: "MevAnalyse",
+        _appid: "adfl_bsc_mev_analyse-ETH",
+        from: fromAddress,
+        to: toAddress,
+        txn_hash: txHash,
+        is_path_valid: dexPath.length == tokenPath.length && isValidPath,
+        block_number: blockNumber.toString(),
+        position: i,
+        nonce,
+        gas_limit: Number(gasLimit.toString()),
+        gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
+        gas_used: Number(gasUsed.toString()),
+        txn_fees: Number(txnFees),
+        txn_fees_usd: txnFeesUsd,
+        token_path: tokenPath,
+        venue_path: dexPath,
+        new_dex: newDexes,
+        hot_pairs: uniqueFormatted,
+        token_in_bis: tokenIn,
+        token_out_bis: tokenOut,
+        venues_addresses: venueAddresses,
+        nb_swap: swapEventCount,
+        amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
+        amount_out_solo: Number(
+          amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
+        ),
+        amount_in_usd_solo:
+          Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
+        amount_out_usd_solo:
+          Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
+          amountOutRate,
+        amount_in: amountsArray?.[0],
+        amount_out: amountsArray?.[amountsArray.length - 1] || 0,
+        revenue_usd: revenueUsd,
+        profit_usd: profitUsd,
+        revenue_usd_bis: revenueUsdBis,
+        profit_usd_bis: profitUsdBis,
+        percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
       };
 
       logDataArray.push(logData);
@@ -3636,8 +3167,7 @@ async function processBlockTransactions(blockNumber) {
       console.log(JSON.stringify(logData));
     }
   }
-  const logDataArray2 = detectMEV(logDataArray, allTxDetails);
-  for (const logData of logDataArray2) writeToLogFile(logData);
+  for (const logData of logDataArray) writeToLogFile(logData);
 
   console.log("Finished block processing", blockNumber);
   console.log(
