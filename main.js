@@ -3103,11 +3103,6 @@ async function processBlockTransactions(blockNumber) {
         }
       }
 
-      let botBalance =
-        toAddress.toLowerCase() === OUR_CONTRACT_ADDRESS
-          ? Number(totalValue)
-          : 0;
-
       let revenueUsd =
         dexPath.length == tokenPath.length ? Number(toBalanceDifference) : 0;
 
