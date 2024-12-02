@@ -3121,7 +3121,7 @@ async function processBlockTransactions(blockNumber) {
         timestamp: getTimestamp(),
         level: "INFO",
         _type: "MevAnalyse",
-        _appid: "adfl_bsc_mev_analyse-ETH",
+        _appid: "ETH",
         from: fromAddress,
         to: toAddress,
         txn_hash: txHash,
