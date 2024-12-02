@@ -3,6 +3,9 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
+// Initialize Ethereum provider
+const provider = new ethers.WebSocketProvider();
+
 // Read JSON file synchronously
 const filePath = "./dexFactories.json";
 // Function to read and parse the JSON file
@@ -2250,9 +2253,6 @@ function writeToLogFile(data) {
   const logEntry = JSON.stringify(data) + "\n";
   fs.appendFileSync(logFilePath, logEntry, "utf8");
 }
-
-// Initialize Ethereum provider
-const provider = new ethers.WebSocketProvider();
 
 // Function to fetch all transactions for a given block
 async function fetchTransactions(blockNumber) {
