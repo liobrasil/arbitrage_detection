@@ -3116,7 +3116,7 @@ async function processBlockTransactions(blockNumber) {
         timestamp: getTimestamp(),
         level: "INFO",
         _type: "MevAnalyse",
-        _appid: "FTM",
+        _appid: "AVAX",
         from: fromAddress,
         to: toAddress,
         txn_hash: txHash,
