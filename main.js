@@ -3024,7 +3024,7 @@ async function processBlockTransactions(blockNumber) {
     if (gasUsed) {
       txnFees = Number(gasUsed) * Number(ethers.formatEther(gasPrice));
     }
-    let txnFeesUsd = txnFees * priceMap["ETH-USDT"];
+    let txnFeesUsd = txnFees; //xDai = $1.00
 
     if (!hasSwapEvent) continue;
 
