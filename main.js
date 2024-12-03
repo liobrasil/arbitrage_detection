@@ -2835,8 +2835,9 @@ async function fetchAllPrices() {
 async function addUsdAmounts(tokens, priceMap) {
   // Map over the transactions to add the usdAmount field
   return tokens.map((token) => {
-    // Handle special case for WBNB -> BNB
-    token.symbol === "WBNB" && (token.symbol = "BNB");
+    // Handle special case for WETH or wstETH -> ETH
+    (token.symbol === "WETH" || token.symbol === "wstETH") &&
+      (token.symbol = "ETH");
     const symbolToUSDT = `${token.symbol}-USDT`;
     const symbolToUSDC = `${token.symbol}-USDC`;
     const symbolToUSD = `${token.symbol}-USD`;
@@ -3023,7 +3024,7 @@ async function processBlockTransactions(blockNumber) {
     if (gasUsed) {
       txnFees = Number(gasUsed) * Number(ethers.formatEther(gasPrice));
     }
-    let txnFeesUsd = txnFees * priceMap["BNB-USDT"];
+    let txnFeesUsd = txnFees * priceMap["ETH-USDT"];
 
     if (!hasSwapEvent) continue;
 
@@ -3065,8 +3066,9 @@ async function processBlockTransactions(blockNumber) {
       let amountInRate = tokenPath[0].split("=>")[0].includes("USD")
         ? 1
         : priceMap[
-            tokenPath[0].split("=>")[0] === "WBNB"
-              ? "BNB-USDT"
+            tokenPath[tokenPath.length - 1].split("=>")[1] === "WETH" ||
+            tokenPath[tokenPath.length - 1].split("=>")[1] === "wstETH"
+              ? "ETH-USDT"
               : tokenPath[0].split("=>")[0] + "-USDT"
           ];
 
@@ -3075,8 +3077,9 @@ async function processBlockTransactions(blockNumber) {
         .includes("USD")
         ? 1
         : priceMap[
-            tokenPath[tokenPath.length - 1].split("=>")[1] === "WBNB"
-              ? "BNB-USDT"
+            tokenPath[tokenPath.length - 1].split("=>")[1] === "WETH" ||
+            tokenPath[tokenPath.length - 1].split("=>")[1] === "wstETH"
+              ? "ETH-USDT"
               : tokenPath[tokenPath.length - 1].split("=>")[1] + "-USDT"
           ];
 
