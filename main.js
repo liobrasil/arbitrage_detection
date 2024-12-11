@@ -2620,10 +2620,9 @@ async function containsArbitrage(txHash) {
       amount0,
       amount1;
 
-    venueAddresses.push(pairAddress);
-
     switch (log.topics[0]) {
       case swapEventSignatureV2:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V2Abi, provider);
 
@@ -2689,21 +2688,22 @@ async function containsArbitrage(txHash) {
         break;
 
       case swapEventSignatureV3:
+        venueAddresses.unshift(pairAddress);
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
 
         try {
           factoryAddress = await pairContract.factory();
-          dexPath.push(getDexNameByAddress(factoryAddress));
+          dexPath.unshift(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown") {
-            newDexes.push(factoryAddress);
+            newDexes.unshift(factoryAddress);
             await addFactory(
               `NewFactory${Object.keys(dexFactories).length}`,
               factoryAddress
             );
           }
         } catch (error) {
-          dexPath.push("V3 interface issue");
+          dexPath.unshift("V3 interface issue");
         }
 
         try {
@@ -2743,30 +2743,31 @@ async function containsArbitrage(txHash) {
         amount0 = ethers.formatUnits(amounts[0], token0Decimals);
         amount1 = ethers.formatUnits(amounts[1], token1Decimals);
         if (Number(amount0) < 0) {
-          tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1 + "=>" + Math.abs(amount0));
+          tokenPath.unshift(token1Symbol + "=>" + token0Symbol);
+          amountsArray.unshift(amount1 + "=>" + Math.abs(amount0));
         } else {
-          tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
+          tokenPath.unshift(token0Symbol + "=>" + token1Symbol);
+          amountsArray.unshift(amount0 + "=>" + Math.abs(amount1));
         }
         break;
 
       case swapEventSignatureMancakeV3:
+        venueAddresses.unshift(pairAddress);
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
 
         try {
           factoryAddress = await pairContract.factory();
-          dexPath.push(getDexNameByAddress(factoryAddress));
+          dexPath.unshift(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown") {
-            newDexes.push(factoryAddress);
+            newDexes.unshift(factoryAddress);
             await addFactory(
               `NewFactory${Object.keys(dexFactories).length}`,
               factoryAddress
             );
           }
         } catch (error) {
-          dexPath.push("V3 Mancake interface issue");
+          dexPath.unshift("V3 Mancake interface issue");
         }
 
         try {
@@ -2814,34 +2815,40 @@ async function containsArbitrage(txHash) {
         amount0 = ethers.formatUnits(amounts[0], token0Decimals);
         amount1 = ethers.formatUnits(amounts[1], token1Decimals);
         if (Number(amount0) < 0) {
-          tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1 + "=>" + Math.abs(amount0));
+          tokenPath.unshift(token1Symbol + "=>" + token0Symbol);
+          amountsArray.unshift(amount1 + "=>" + Math.abs(amount0));
         } else {
-          tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
+          tokenPath.unshift(token0Symbol + "=>" + token1Symbol);
+          amountsArray.unshift(amount0 + "=>" + Math.abs(amount1));
         }
         break;
       case curveSwapSignature:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("Curve");
         break;
       case curveSwapSignatureNew:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("CurveNew");
         break;
       case DODOSwapSignature:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("DODOSwap");
         break;
       case MDEXV3SwapSignature:
+        venueAddresses.unshift(pairAddress);
         swapEventCount++;
-        dexPath.push("MDEXV3");
+        dexPath.unshift("MDEXV3");
         break;
       case NerveSignature:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("Nerve");
         break;
       case balancerSwapSignature:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("Balancer");
 
