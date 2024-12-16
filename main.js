@@ -3622,6 +3622,10 @@ async function processBlockTransactions(blockNumber) {
           revenue_usd_bis: revenueUsdBis,
           profit_usd_bis: profitUsdBis,
           percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
+          opportunity_key:
+            blockNumber +
+            "." +
+            venueAddresses.map((addr) => addr.slice(2)).join("."),
         },
         ...(botBalance > 0
           ? { bot_balance: botBalance, botBalances: formatBalances(balances) }
