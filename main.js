@@ -3,8 +3,8 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
-// Initialize Ethereum provider
-const provider = new ethers.WebSocketProvider();
+const IPC_PATH = "/home/ethereum/node/geth.ipc";
+const provider = new ethers.IpcSocketProvider(IPC_PATH);
 
 // Read JSON file synchronously
 const filePath = "./dexFactories.json";
