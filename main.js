@@ -3063,6 +3063,7 @@ async function processBlockTransactions(blockNumber) {
 
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
+      console.log("---------------- tokenPath ----------------:", tokenPath[0]);
       let amountInRate = tokenPath[0].split("=>")[0].includes("USD")
         ? 1
         : priceMap[
