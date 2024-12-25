@@ -3,6 +3,7 @@ const axios = require("axios");
 const { Pool } = require("pg");
 const fs = require("fs");
 const path = require("path");
+const dotenv = require("dotenv");
 
 // Postgre connection
 dotenv.config();
