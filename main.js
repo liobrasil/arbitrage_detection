@@ -1,7 +1,22 @@
 const { ethers } = require("ethers");
 const axios = require("axios");
+const { Pool } = require("pg");
 const fs = require("fs");
 const path = require("path");
+
+// Postgre connection
+dotenv.config();
+
+// Initialize connection pool
+const pool = new Pool({
+  connectionString: process.env.CONNECTION_STRING_DB,
+  max: 20, // maximum number of clients in the pool
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+
+//connect to DB
+const client = await pool.connect();
 
 // Read JSON file synchronously
 const filePath = "./dexFactories.json";
@@ -109,21 +124,56 @@ const addFactory = async (key, value) => {
           }`;
         }
 
-        const logNewContract = {
-          ...{
+        // Create the query to insert into the dexes table
+        const query = {
+          text: `INSERT INTO public.dexes (
+                name, 
+                factory_address, 
+                fee, 
+                fork, 
+                is_sync,
+                create_ts,
+                multiplier_fee
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (factory_address) DO NOTHING`,
+          values: [
+            key, // name
+            value, // factory_address
+            multipliers.fee, // fee
+            "V2", // fork
+            0, // is_sync
+            new Date(), // create_ts
+            null, // multiplier_fee
+          ],
+        };
+
+        try {
+          await client.query(query);
+
+          // Optional: Still keep logging if needed
+          const logNewContract = {
             timestamp: getTimestamp(),
             level: "INFO",
             _type: "NewDexes",
             _appid: "adfl_bsc_mev_analyse",
-          },
-          ...contractDatas,
-          address: value,
-          fees: multipliers.fee,
-
-          nameInDexFactory: key,
-        };
-
-        writeToLogFile(logNewContract);
+            ...contractDatas,
+            address: value,
+            fees: multipliers.fee,
+            nameInDexFactory: key,
+          };
+          writeToLogFile(logNewContract);
+        } catch (err) {
+          console.error("Error inserting new DEX:", err);
+          writeToLogFile({
+            timestamp: getTimestamp(),
+            level: "ERROR",
+            _type: "NewDexesError",
+            _appid: "adfl_bsc_mev_analyse",
+            error: err.message,
+            contractData: contractDatas,
+            address: value,
+          });
+        }
       }
     }
 
