@@ -15,9 +15,6 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-//connect to DB
-const client = await pool.connect();
-
 // Read JSON file synchronously
 const filePath = "./dexFactories.json";
 // Function to read and parse the JSON file
@@ -117,6 +114,9 @@ const addFactory = async (key, value) => {
       const multipliers = extractMultipliers(contractDatas.sourceCode);
 
       if (multipliers.success) {
+        //connect to DB
+        const client = await pool.connect();
+
         key = contractDatas.contractName;
         if (Object.keys(dexFactories).includes(key)) {
           key = `${contractDatas.contractName}_${
