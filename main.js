@@ -16,11 +16,6 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-console.log(
-  "------------------ connectionString ------------------",
-  process.env.CONNECTION_STRING_DB
-);
-
 // Read JSON file synchronously
 const filePath = "./dexFactories.json";
 // Function to read and parse the JSON file
@@ -154,6 +149,7 @@ const addFactory = async (key, value) => {
         };
 
         try {
+          console.log("Inserting new DEX:", query);
           await client.query(query);
 
           // Optional: Still keep logging if needed
