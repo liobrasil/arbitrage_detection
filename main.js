@@ -138,7 +138,7 @@ const addFactory = async (key, value) => {
             ) VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (factory_address) DO NOTHING`,
           values: [
-            key, // name
+            contractDatas.contractName + Object.keys(dexFactories).length, // name
             value, // factory_address
             multipliers.fee, // fee
             "V2", // fork
