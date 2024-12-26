@@ -16,6 +16,66 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
+let client;
+
+// Function to establish connection
+async function connect() {
+  try {
+    if (client) {
+      try {
+        // Test if current connection is still valid
+        await client.query("SELECT 1");
+        return client;
+      } catch (err) {
+        console.log("Current connection dead, reconnecting...");
+        try {
+          await client.release();
+        } catch (releaseErr) {
+          console.error("Error releasing dead client:", releaseErr);
+        }
+      }
+    }
+
+    client = await pool.connect();
+    console.log("Database connected successfully");
+
+    // Setup event listeners for the client
+    client.on("error", async (err) => {
+      console.error("Database client error:", err);
+      await reconnect();
+    });
+
+    return client;
+  } catch (err) {
+    console.error("Failed to connect to database:", err);
+    // Wait and try to reconnect
+    await reconnect();
+  }
+}
+
+// Function to handle reconnection
+async function reconnect(retryDelay = 5000) {
+  console.log(`Attempting to reconnect in ${retryDelay / 1000} seconds...`);
+  await new Promise((resolve) => setTimeout(resolve, retryDelay));
+  await connect();
+}
+
+// Self-executing async function to establish initial connection
+(async () => {
+  await connect();
+})();
+
+// Function to get a client with connection check
+async function getClient() {
+  try {
+    // Test current connection
+    await client.query("SELECT 1");
+    return client;
+  } catch (err) {
+    console.log("Connection test failed, reconnecting...");
+    return await connect();
+  }
+}
 // Read JSON file synchronously
 const filePath = "./dexFactories.json";
 // Function to read and parse the JSON file
@@ -115,9 +175,6 @@ const addFactory = async (key, value) => {
       const multipliers = extractMultipliers(contractDatas.sourceCode);
 
       if (multipliers.success) {
-        //connect to DB
-        const client = await pool.connect();
-
         key = contractDatas.contractName;
         if (Object.keys(dexFactories).includes(key)) {
           key = `${contractDatas.contractName}_${
@@ -138,7 +195,7 @@ const addFactory = async (key, value) => {
             ) VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (factory_address) DO NOTHING`,
           values: [
-            contractDatas.contractName + Object.keys(dexFactories).length, // name
+            contractDatas.contractName + "_" + Object.keys(dexFactories).length, // name
             value, // factory_address
             multipliers.fee, // fee
             "V2", // fork
@@ -150,7 +207,8 @@ const addFactory = async (key, value) => {
 
         try {
           console.log("Inserting new DEX:", query);
-          await client.query(query);
+          const dbClient = await getClient();
+          await dbClient.query(query);
 
           // Optional: Still keep logging if needed
           const logNewContract = {
