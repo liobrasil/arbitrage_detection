@@ -3132,68 +3132,53 @@ async function processBlockTransactions(blockNumber) {
         dexPath.length == tokenPath.length ? revenueUsdBis - txnFeesUsd : 0;
 
       const logData = {
-        ...{
-          timestamp: getTimestamp(),
-          level: "INFO",
-          _type: "MevAnalyse",
-          _appid: "eth_arbscan",
-          from: fromAddress,
-          to: toAddress,
-          txn_hash: txHash,
-          is_path_valid: dexPath.length == tokenPath.length && isValidPath,
-          block_number: blockNumber.toString(),
-          validator: block.miner.toString(),
-          position: i,
-          nonce,
-          gas_limit: Number(gasLimit.toString()),
-          gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
-          gas_used: Number(gasUsed.toString()),
-          txn_fees: Number(txnFees),
-          txn_fees_usd: txnFeesUsd,
-          token_path: tokenPath,
-          venue_path: dexPath,
-          new_dex: newDexes,
-          hot_pairs: uniqueFormatted,
-          token_in_bis: tokenIn,
-          token_out_bis: tokenOut,
-          venues_addresses: venueAddresses,
-          is_new_dex_verified:
-            newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
-          nb_swap: swapEventCount,
-          amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
-          amount_out_solo: Number(
-            amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
-          ),
-          amount_in_usd_solo:
-            Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
-          amount_out_usd_solo:
-            Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
-            amountOutRate,
-          amount_in: amountsArray?.[0],
-          amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-          revenue_usd: revenueUsd,
-          profit_usd: profitUsd,
-          revenue_usd_bis: revenueUsdBis,
-          profit_usd_bis: profitUsdBis,
-          percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
-          opportunity_key:
-            blockNumber +
-            "." +
-            venueAddresses.map((addr) => addr.slice(2)).join("."),
-        },
-        ...(botBalance > 0
-          ? { bot_balance: botBalance, botBalances: formatBalances(balances) }
-          : {}),
-        ...(paymentValue > 0
-          ? {
-              builder,
-              toBuilder,
-              payment_value: paymentValue,
-              payment_value_usd: usdPaymentValue,
-              percentage_payment_bis:
-                100 * (usdPaymentValue / (revenueUsdBis - txnFeesUsd)),
-            }
-          : {}),
+        timestamp: getTimestamp(),
+        level: "INFO",
+        _type: "MevAnalyse",
+        _appid: "eth_arbscan",
+        from: fromAddress,
+        to: toAddress,
+        txn_hash: txHash,
+        is_path_valid: dexPath.length == tokenPath.length && isValidPath,
+        block_number: blockNumber.toString(),
+        validator: block.miner.toString(),
+        position: i,
+        nonce,
+        gas_limit: Number(gasLimit.toString()),
+        gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
+        gas_used: Number(gasUsed.toString()),
+        txn_fees: Number(txnFees),
+        txn_fees_usd: txnFeesUsd,
+        token_path: tokenPath,
+        venue_path: dexPath,
+        new_dex: newDexes,
+        hot_pairs: uniqueFormatted,
+        token_in_bis: tokenIn,
+        token_out_bis: tokenOut,
+        venues_addresses: venueAddresses,
+        is_new_dex_verified:
+          newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
+        nb_swap: swapEventCount,
+        amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
+        amount_out_solo: Number(
+          amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
+        ),
+        amount_in_usd_solo:
+          Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
+        amount_out_usd_solo:
+          Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
+          amountOutRate,
+        amount_in: amountsArray?.[0],
+        amount_out: amountsArray?.[amountsArray.length - 1] || 0,
+        revenue_usd: revenueUsd,
+        profit_usd: profitUsd,
+        revenue_usd_bis: revenueUsdBis,
+        profit_usd_bis: profitUsdBis,
+        percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
+        opportunity_key:
+          blockNumber +
+          "." +
+          venueAddresses.map((addr) => addr.slice(2)).join("."),
       };
 
       logDataArray.push(logData);
