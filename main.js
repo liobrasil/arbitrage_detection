@@ -1,7 +1,9 @@
 const { ethers } = require("ethers");
 const axios = require("axios");
+const { Pool } = require("pg");
 const fs = require("fs");
 const path = require("path");
+const dotenv = require("dotenv");
 
 const IPC_PATH = "/home/ethereum/node/geth.ipc";
 const provider = new ethers.IpcSocketProvider(IPC_PATH);
@@ -2299,7 +2301,7 @@ function getUniqueFormattedPairs(dexPath, tokenPath) {
 async function containsArbitrage(txHash) {
   const receipt = await provider.getTransactionReceipt(txHash);
   const isSuccessful =
-    receipt?.status === 1 && Number(receipt?.gasUsed) > 120000;
+    receipt?.status === 1 && Number(receipt?.gasUsed) > 80000;
 
   // Initialize counters and path array
   let swapEventCount = 0;
@@ -2379,10 +2381,9 @@ async function containsArbitrage(txHash) {
       amount0,
       amount1;
 
-    venueAddresses.push(pairAddress);
-
     switch (log.topics[0]) {
       case swapEventSignatureV2:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V2Abi, provider);
 
@@ -2448,21 +2449,22 @@ async function containsArbitrage(txHash) {
         break;
 
       case swapEventSignatureV3:
+        venueAddresses.unshift(pairAddress);
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
 
         try {
           factoryAddress = await pairContract.factory();
-          dexPath.push(getDexNameByAddress(factoryAddress));
+          dexPath.unshift(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown") {
-            newDexes.push(factoryAddress);
+            newDexes.unshift(factoryAddress);
             await addFactory(
               `NewFactory${Object.keys(dexFactories).length}`,
               factoryAddress
             );
           }
         } catch (error) {
-          dexPath.push("V3 interface issue");
+          dexPath.unshift("V3 interface issue");
         }
 
         try {
@@ -2502,30 +2504,31 @@ async function containsArbitrage(txHash) {
         amount0 = ethers.formatUnits(amounts[0], token0Decimals);
         amount1 = ethers.formatUnits(amounts[1], token1Decimals);
         if (Number(amount0) < 0) {
-          tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1 + "=>" + Math.abs(amount0));
+          tokenPath.unshift(token1Symbol + "=>" + token0Symbol);
+          amountsArray.unshift(amount1 + "=>" + Math.abs(amount0));
         } else {
-          tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
+          tokenPath.unshift(token0Symbol + "=>" + token1Symbol);
+          amountsArray.unshift(amount0 + "=>" + Math.abs(amount1));
         }
         break;
 
       case swapEventSignatureMancakeV3:
+        venueAddresses.unshift(pairAddress);
         swapEventCount++;
         pairContract = new ethers.Contract(pairAddress, V3Abi, provider);
 
         try {
           factoryAddress = await pairContract.factory();
-          dexPath.push(getDexNameByAddress(factoryAddress));
+          dexPath.unshift(getDexNameByAddress(factoryAddress));
           if (getDexNameByAddress(factoryAddress) == "Unknown") {
-            newDexes.push(factoryAddress);
+            newDexes.unshift(factoryAddress);
             await addFactory(
               `NewFactory${Object.keys(dexFactories).length}`,
               factoryAddress
             );
           }
         } catch (error) {
-          dexPath.push("V3 Mancake interface issue");
+          dexPath.unshift("V3 Mancake interface issue");
         }
 
         try {
@@ -2573,34 +2576,40 @@ async function containsArbitrage(txHash) {
         amount0 = ethers.formatUnits(amounts[0], token0Decimals);
         amount1 = ethers.formatUnits(amounts[1], token1Decimals);
         if (Number(amount0) < 0) {
-          tokenPath.push(token1Symbol + "=>" + token0Symbol);
-          amountsArray.push(amount1 + "=>" + Math.abs(amount0));
+          tokenPath.unshift(token1Symbol + "=>" + token0Symbol);
+          amountsArray.unshift(amount1 + "=>" + Math.abs(amount0));
         } else {
-          tokenPath.push(token0Symbol + "=>" + token1Symbol);
-          amountsArray.push(amount0 + "=>" + Math.abs(amount1));
+          tokenPath.unshift(token0Symbol + "=>" + token1Symbol);
+          amountsArray.unshift(amount0 + "=>" + Math.abs(amount1));
         }
         break;
       case curveSwapSignature:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("Curve");
         break;
       case curveSwapSignatureNew:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("CurveNew");
         break;
       case DODOSwapSignature:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("DODOSwap");
         break;
       case MDEXV3SwapSignature:
+        venueAddresses.unshift(pairAddress);
         swapEventCount++;
-        dexPath.push("MDEXV3");
+        dexPath.unshift("MDEXV3");
         break;
       case NerveSignature:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("Nerve");
         break;
       case balancerSwapSignature:
+        venueAddresses.push(pairAddress);
         swapEventCount++;
         dexPath.push("Balancer");
 
@@ -2986,7 +2995,9 @@ function formatBalances(balances) {
 // Updated main function
 async function processBlockTransactions(blockNumber) {
   let totalArbitrageCount = 0;
-  let [transactions, priceMap] = await Promise.all([
+
+  let [block, transactions, priceMap] = await Promise.all([
+    provider.getBlock(blockNumber),
     fetchTransactions(blockNumber),
     fetchAllPrices(),
   ]);
@@ -3063,7 +3074,7 @@ async function processBlockTransactions(blockNumber) {
 
       let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
-      if(!tokenPath[0]) break;
+      if (!tokenPath[0]) break;
 
       console.log("Token Path: ", tokenPath);
       console.log("Token0 : ", tokenPath[0]);
@@ -3121,46 +3132,68 @@ async function processBlockTransactions(blockNumber) {
         dexPath.length == tokenPath.length ? revenueUsdBis - txnFeesUsd : 0;
 
       const logData = {
-        timestamp: getTimestamp(),
-        level: "INFO",
-        _type: "MevAnalyse",
-        _appid: "ETH",
-        from: fromAddress,
-        to: toAddress,
-        txn_hash: txHash,
-        is_path_valid: dexPath.length == tokenPath.length && isValidPath,
-        block_number: blockNumber.toString(),
-        position: i,
-        nonce,
-        gas_limit: Number(gasLimit.toString()),
-        gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
-        gas_used: Number(gasUsed.toString()),
-        txn_fees: Number(txnFees),
-        txn_fees_usd: txnFeesUsd,
-        token_path: tokenPath,
-        venue_path: dexPath,
-        new_dex: newDexes,
-        hot_pairs: uniqueFormatted,
-        token_in_bis: tokenIn,
-        token_out_bis: tokenOut,
-        venues_addresses: venueAddresses,
-        nb_swap: swapEventCount,
-        amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
-        amount_out_solo: Number(
-          amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
-        ),
-        amount_in_usd_solo:
-          Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
-        amount_out_usd_solo:
-          Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
-          amountOutRate,
-        amount_in: amountsArray?.[0],
-        amount_out: amountsArray?.[amountsArray.length - 1] || 0,
-        revenue_usd: revenueUsd,
-        profit_usd: profitUsd,
-        revenue_usd_bis: revenueUsdBis,
-        profit_usd_bis: profitUsdBis,
-        percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
+        ...{
+          timestamp: getTimestamp(),
+          level: "INFO",
+          _type: "MevAnalyse",
+          _appid: "eth_arbscan",
+          from: fromAddress,
+          to: toAddress,
+          txn_hash: txHash,
+          is_path_valid: dexPath.length == tokenPath.length && isValidPath,
+          block_number: blockNumber.toString(),
+          validator: block.miner.toString(),
+          position: i,
+          nonce,
+          gas_limit: Number(gasLimit.toString()),
+          gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
+          gas_used: Number(gasUsed.toString()),
+          txn_fees: Number(txnFees),
+          txn_fees_usd: txnFeesUsd,
+          token_path: tokenPath,
+          venue_path: dexPath,
+          new_dex: newDexes,
+          hot_pairs: uniqueFormatted,
+          token_in_bis: tokenIn,
+          token_out_bis: tokenOut,
+          venues_addresses: venueAddresses,
+          is_new_dex_verified:
+            newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
+          nb_swap: swapEventCount,
+          amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
+          amount_out_solo: Number(
+            amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
+          ),
+          amount_in_usd_solo:
+            Number(amountsArray?.[0]?.split("=>")[0]) * amountInRate,
+          amount_out_usd_solo:
+            Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
+            amountOutRate,
+          amount_in: amountsArray?.[0],
+          amount_out: amountsArray?.[amountsArray.length - 1] || 0,
+          revenue_usd: revenueUsd,
+          profit_usd: profitUsd,
+          revenue_usd_bis: revenueUsdBis,
+          profit_usd_bis: profitUsdBis,
+          percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
+          opportunity_key:
+            blockNumber +
+            "." +
+            venueAddresses.map((addr) => addr.slice(2)).join("."),
+        },
+        ...(botBalance > 0
+          ? { bot_balance: botBalance, botBalances: formatBalances(balances) }
+          : {}),
+        ...(paymentValue > 0
+          ? {
+              builder,
+              toBuilder,
+              payment_value: paymentValue,
+              payment_value_usd: usdPaymentValue,
+              percentage_payment_bis:
+                100 * (usdPaymentValue / (revenueUsdBis - txnFeesUsd)),
+            }
+          : {}),
       };
 
       logDataArray.push(logData);
