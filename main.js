@@ -2650,7 +2650,7 @@ async function fetchContractCode(contractAddress) {
 async function containsArbitrage(txHash) {
   const receipt = await provider.getTransactionReceipt(txHash);
   const isSuccessful =
-    receipt?.status === 1 && Number(receipt?.gasUsed) > 120000;
+    receipt?.status === 1 && Number(receipt?.gasUsed) > 80000;
 
   // Initialize counters and path array
   let swapEventCount = 0;
@@ -3513,7 +3513,9 @@ function detectMEV(logDataArray, allTxDetails) {
 // Updated main function
 async function processBlockTransactions(blockNumber) {
   let totalArbitrageCount = 0;
-  let [transactions, priceMap] = await Promise.all([
+
+  let [block, transactions, priceMap] = await Promise.all([
+    provider.getBlock(blockNumber),
     fetchTransactions(blockNumber),
     fetchAllPrices(),
   ]);
@@ -3699,6 +3701,7 @@ async function processBlockTransactions(blockNumber) {
           txn_hash: txHash,
           is_path_valid: dexPath.length == tokenPath.length && isValidPath,
           block_number: blockNumber.toString(),
+          validator: block.miner.toString(),
           position: i,
           nonce,
           gas_limit: Number(gasLimit.toString()),
