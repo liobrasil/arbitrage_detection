@@ -3640,15 +3640,9 @@ async function processBlockTransactions(blockNumber) {
       const tokens = await getTokensInTransaction(txHash, priceMap);
 
       // Check for blacklisted tokens
-      const blacklistedTokensFound = [
-        ...new Set(
-          tokens
-            .filter((token) =>
-              blacklistedTokens.includes(token.tokenAddress.toLowerCase())
-            )
-            .map((token) => `${token.symbol}-${token.tokenAddress}`)
-        ),
-      ];
+      const blacklistedTokensFound = tokens.filter((token) =>
+        blacklistedTokens.includes(token.tokenAddress.toLowerCase())
+      );
 
       let { builder, toBuilder, paymentValue } = await getInternalTransactions(
         txHash
@@ -3727,8 +3721,14 @@ async function processBlockTransactions(blockNumber) {
           level: "INFO",
           _type: "MevAnalyse",
           _appid: "bsc_arbscan",
-          blacklisted_tokens:
-            blacklistedTokensFound.length > 0 ? blacklistedTokensFound : "",
+          blacklisted_tokens_addresses: [
+            ...new Set(
+              blacklistedTokensFound.map((token) => token.tokenAddress)
+            ),
+          ],
+          blacklisted_tokens_symbols: [
+            ...new Set(blacklistedTokensFound.map((token) => token.symbol)),
+          ],
           from: fromAddress,
           to: toAddress,
           txn_hash: txHash,
