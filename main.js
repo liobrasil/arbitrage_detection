@@ -3721,6 +3721,7 @@ async function processBlockTransactions(blockNumber) {
           level: "INFO",
           _type: "MevAnalyse",
           _appid: "bsc_arbscan",
+          contains_blacklisted_tokens: blacklistedTokensFound.length > 0,
           blacklisted_tokens_addresses: [
             ...new Set(
               blacklistedTokensFound.map((token) => token.tokenAddress)
