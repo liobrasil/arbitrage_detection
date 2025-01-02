@@ -76,6 +76,20 @@ async function getClient() {
     return await connect();
   }
 }
+
+// Function to get blacklisted tokens
+async function getBlacklistedTokens() {
+  try {
+    const result = await pool.query(
+      "SELECT address FROM public.tokens_blacklist"
+    );
+    return result.rows.map((row) => row.address.toLowerCase());
+  } catch (error) {
+    console.error("Error fetching blacklisted tokens:", error);
+    return [];
+  }
+}
+
 // Read JSON file synchronously
 const filePath = "./dexFactories.json";
 // Function to read and parse the JSON file
@@ -3514,6 +3528,9 @@ function detectMEV(logDataArray, allTxDetails) {
 async function processBlockTransactions(blockNumber) {
   let totalArbitrageCount = 0;
 
+  // Add blacklisted tokens fetch
+  const blacklistedTokens = await getBlacklistedTokens();
+
   let [block, transactions, priceMap] = await Promise.all([
     provider.getBlock(blockNumber),
     fetchTransactions(blockNumber),
@@ -3619,6 +3636,19 @@ async function processBlockTransactions(blockNumber) {
       fromBalanceDifference ||
       fromBalanceDifference === 0
     ) {
+      // Inside the main loop, after getting tokens involved in transaction
+      const tokens = await getTokensInTransaction(txHash, priceMap);
+
+      // Check for blacklisted tokens
+      const blacklistedTokensFound = tokens
+        .filter((token) =>
+          blacklistedTokens.includes(token.tokenAddress.toLowerCase())
+        )
+        .map((token) => ({
+          address: token.tokenAddress,
+          symbol: token.symbol,
+        }));
+
       let { builder, toBuilder, paymentValue } = await getInternalTransactions(
         txHash
       );
@@ -3696,6 +3726,8 @@ async function processBlockTransactions(blockNumber) {
           level: "INFO",
           _type: "MevAnalyse",
           _appid: "bsc_arbscan",
+          blacklisted_tokens:
+            blacklistedTokensFound.length > 0 ? blacklistedTokensFound : null,
           from: fromAddress,
           to: toAddress,
           txn_hash: txHash,
