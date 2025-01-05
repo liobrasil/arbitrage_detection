@@ -3138,7 +3138,7 @@ async function processBlockTransactions(blockNumber) {
         _appid: "eth_arbscan",
         from: fromAddress,
         to: toAddress,
-        txn_hash: txHash,
+        transaction_hash: txHash,
         is_path_valid: dexPath.length == tokenPath.length && isValidPath,
         block_number: blockNumber.toString(),
         validator: block.miner.toString(),
