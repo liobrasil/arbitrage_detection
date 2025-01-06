@@ -3176,7 +3176,7 @@ async function processBlockTransactions(blockNumber) {
         profit_usd_bis: profitUsdBis,
         percentage_revenue_bis: 100 * (txnFeesUsd / revenueUsdBis),
         opportunity_key:
-          blockNumber +
+          (blockNumber - 1) +
           "." +
           venueAddresses.map((addr) => addr.slice(2).toLowerCase()).join("."),
       };
