@@ -3178,7 +3178,7 @@ async function processBlockTransactions(blockNumber) {
         opportunity_key:
           blockNumber +
           "." +
-          venueAddresses.map((addr) => addr.slice(2)).join("."),
+          venueAddresses.map((addr) => addr.slice(2).toLowerCase()).join("."),
       };
 
       logDataArray.push(logData);
