@@ -107,7 +107,7 @@ const readJsonFile = () => {
 
 let dexFactories = readJsonFile();
 
-const OUR_CONTRACT_ADDRESS = "0xa08a96303abcaf78789104567cc59ba891de0864";
+const OUR_CONTRACT_ADDRESS = "0x87553b4336be901bf7460213d42f5171fa416750";
 const BSCSCAN_API_KEY = "71XH1XIDNUERIVZ7P8YUUE41K7EZT7245S";
 
 const extractMultipliers = (code) => {
