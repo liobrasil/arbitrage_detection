@@ -2618,26 +2618,6 @@ function isPathValid(path) {
   return true;
 }
 
-function getUniqueFormattedPairs(dexPath, tokenPath) {
-  if (dexPath.length !== tokenPath.length) return [];
-  const uniquePairs = [];
-
-  for (let i = 0; i < tokenPath.length; i++) {
-    // Extract tokens for this swap
-    const [tokenA, tokenB] = tokenPath[i].split("=>");
-
-    // Order tokens alphabetically
-    const orderedTokens = [tokenA, tokenB].sort().join("-");
-
-    // Combine dex and ordered token pair
-    if (uniquePairs.includes(`${dexPath[i]}: ${orderedTokens}`)) continue; // Skip if already found
-    uniquePairs.push(`${dexPath[i]}: ${orderedTokens}`);
-  }
-
-  // Convert the set to an array and join with " and " as separator
-  return uniquePairs;
-}
-
 async function fetchContractCode(contractAddress) {
   try {
     const response = await axios.get(
@@ -3585,7 +3565,7 @@ async function processBlockTransactions(blockNumber) {
         to: toAddress,
         txn_hash: txHash,
         block_number: blockNumber.toString(),
-        position: i,
+        transaction_index: i,
         nonce,
         is_single_transfer: true,
         data: txDetails.data,
@@ -3651,8 +3631,6 @@ async function processBlockTransactions(blockNumber) {
       totalArbitrageCount++;
 
       let usdPaymentValue = paymentValue * priceMap["BNB-USDT"];
-
-      let uniqueFormatted = getUniqueFormattedPairs(dexPath, tokenPath);
 
       let amountInRate = tokenPath[0].split("=>")[0].includes("USD")
         ? 1
@@ -3734,25 +3712,24 @@ async function processBlockTransactions(blockNumber) {
           to: toAddress,
           txn_hash: txHash,
           is_path_valid: dexPath.length == tokenPath.length && isValidPath,
-          block_number: blockNumber.toString(),
+          block_number: blockNumber,
           validator: block.miner.toString(),
-          position: i,
+          transaction_index: i,
           nonce,
           gas_limit: Number(gasLimit.toString()),
-          gas_price: Number(ethers.formatUnits(gasPrice, 9)), //Gwei
+          gas_price: Number(ethers.formatUnits(gasPrice, 0)), //Gwei
           gas_used: Number(gasUsed.toString()),
           txn_fees: Number(txnFees),
           txn_fees_usd: txnFeesUsd,
           token_path: tokenPath,
           venue_path: dexPath,
           new_dex: newDexes,
-          hot_pairs: uniqueFormatted,
-          token_in_bis: tokenIn,
-          token_out_bis: tokenOut,
+          token_in_symbol: tokenIn, // _address et _symbol
+          token_out_symbol: tokenOut, // _address et _symbol
           venues_addresses: venueAddresses,
           is_new_dex_verified:
             newDexes.length > 0 ? await checkContractsVerified(newDexes) : null,
-          nb_swap: swapEventCount,
+          hops_count: swapEventCount,
           amount_in_solo: Number(amountsArray?.[0]?.split("=>")[0]),
           amount_out_solo: Number(
             amountsArray?.[amountsArray.length - 1]?.split("=>")[1]
@@ -3762,8 +3739,8 @@ async function processBlockTransactions(blockNumber) {
           amount_out_usd_solo:
             Number(amountsArray?.[amountsArray.length - 1]?.split("=>")[1]) *
             amountOutRate,
-          amount_in: amountsArray?.[0],
-          amount_out: amountsArray?.[amountsArray.length - 1] || 0,
+          // amount_in: amountsArray?.[0],
+          // amount_out: amountsArray?.[amountsArray.length - 1] || 0,
           revenue_usd: revenueUsd,
           profit_usd: profitUsd,
           revenue_usd_bis: revenueUsdBis,
